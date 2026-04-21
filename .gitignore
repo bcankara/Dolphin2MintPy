@@ -38,3 +38,6 @@ htmlcov/
 
 # Dolphin2MintPy — user-specific settings (per-project paths)
 dolphin2mintpy_settings.json
+
+# Temporary commit message files
+.commit_msg.tmp
