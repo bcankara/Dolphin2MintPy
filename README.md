@@ -41,7 +41,8 @@ Dolphin2MintPy is a **metadata translation layer**. It never modifies your raste
 | 🧭 **Radar / geo aware**      | Auto-detects radar vs geocoded stacks; `--geometry-mode` lets you override. |
 | 💾 **Persistent settings**    | Paths remembered between runs in `dolphin2mintpy_settings.json`.            |
 | ⚡ **Automated `.rsc`**        | Unwrapped, coherence, conncomp, DEM, incidence and azimuth — all covered.  |
-| 🌉 **Ready-to-run MintPy cfg**| `PROCESSOR=hyp3` routing with correct glob patterns baked in.               |
+| 🌉 **Ready-to-run MintPy cfg**| Emits `demFile`, `incAngleFile`, `azAngleFile`, `lookupYFile`, `lookupXFile`, `waterMaskFile`, `networkInversion.*` and reference point — no hand-editing needed. |
+| 🔍 **Geometry auto-fill**     | Selecting the geometry directory auto-fills DEM / lookup file paths (`hgt.rdr.full`, `los.rdr.full`, `lat.rdr.full`, `lon.rdr.full`). |
 | 🛰️ **ISCE2-aware**            | Reads reference XML (wavelength, heading, incidence, PRF) + baselines.      |
 | ⚙️ **Scriptable CLI**          | `prepare`, `generate-config`, `info` — HPC- and CI/CD-friendly.             |
 | 🧪 **Well-tested**            | GitHub Actions CI across Python 3.9–3.12 with 40+ unit tests.               |
@@ -249,9 +250,16 @@ dolphin2mintpy prepare \
     --ref-date 20240919
 
 # Emit a MintPy smallbaselineApp-compatible config
+# (pass the lookup tables so MintPy can geocode the radar-geometry results)
 dolphin2mintpy generate-config \
     --work-dir ./mintpy \
-    --unw-dir ./unwrapped
+    --unw-dir ./unwrapped \
+    --dem-file /path/to/geom_reference/hgt.rdr.full \
+    --inc-angle-file /path/to/geom_reference/los.rdr.full \
+    --az-angle-file /path/to/geom_reference/los.rdr.full \
+    --lookup-y-file /path/to/geom_reference/lat.rdr.full \
+    --lookup-x-file /path/to/geom_reference/lon.rdr.full \
+    --processor isce
 
 # Inspect a Dolphin stack (file counts, date range, ref date)
 dolphin2mintpy info --unw-dir ./unwrapped
@@ -297,6 +305,19 @@ Dolphin2MintPy also logs its decision on startup, so you can verify the mode bef
 ```
 [INFO] dolphin2mintpy.prepare: Detected geometry: RADAR — auto (no projection and identity geotransform) (override with geometry_mode='radar' or 'geo' if incorrect)
 ```
+
+### 4. Geometry & lookup table fields (avoiding the four classic MintPy errors)
+
+When Dolphin's GeoTIFF outputs are combined with ISCE2 topsStack geometry files, four MintPy failures commonly show up. Dolphin2MintPy addresses each by explicitly asking for the matching path (in the GUI *and* the CLI):
+
+| MintPy error                                                        | Root cause                                                                             | Field to populate                                                |
+|---------------------------------------------------------------------|----------------------------------------------------------------------------------------|------------------------------------------------------------------|
+| `KeyError: 'DATE12'`                                                | MintPy could not build ROI_PAC metadata from Dolphin TIFFs.                            | Automatic — `.rsc` sidecars with `DATE12` + `P_BASELINE_TOP_HDR`. |
+| `ValueError: cannot reshape array of size ...`                      | `PROCESSOR=isce` forced a raw-binary read of a compressed GeoTIFF.                     | Automatic — `.rsc` now writes `PROCESSOR=hyp3` to use GDAL.       |
+| `FileNotFoundError: inputs/geometryGeo.h5`                          | `Y_FIRST`/`X_FIRST=0` flagged the stack as geocoded although it was radar geometry.    | `Geometry mode = radar` (GUI) / `--geometry-mode radar` (CLI).    |
+| `FileNotFoundError: No lookup table (longitude or rangeCoord) found`| MintPy needs `latitude` / `longitude` datasets to geocode radar results.               | **Lookup Y (latitude) file** + **Lookup X (longitude) file** — typically `lat.rdr.full` and `lon.rdr.full`. |
+
+Point the **Geometry directory** field at the ISCE2 `geom_reference/` folder and the GUI auto-fills the DEM, incidence, azimuth and lookup file paths for you. From the CLI, pass the six paths explicitly to `generate-config` (see the example above).
 
 ---
 

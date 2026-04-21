@@ -137,7 +137,43 @@ examples:
     )
     cfg_parser.add_argument(
         "--dem-file", default=None,
-        help="DEM GeoTIFF file path or glob pattern.",
+        help="DEM file path (e.g. hgt.rdr.full) or glob pattern.",
+    )
+    cfg_parser.add_argument(
+        "--inc-angle-file", default=None,
+        help="Incidence angle file (e.g. los.rdr.full).",
+    )
+    cfg_parser.add_argument(
+        "--az-angle-file", default=None,
+        help="Azimuth angle file (e.g. los.rdr.full).",
+    )
+    cfg_parser.add_argument(
+        "--lookup-y-file", default=None,
+        help=(
+            "Latitude lookup table (e.g. lat.rdr.full). Required in "
+            "radar geometry to geocode MintPy results."
+        ),
+    )
+    cfg_parser.add_argument(
+        "--lookup-x-file", default=None,
+        help=(
+            "Longitude lookup table (e.g. lon.rdr.full). Required in "
+            "radar geometry to geocode MintPy results."
+        ),
+    )
+    cfg_parser.add_argument(
+        "--water-mask-file", default=None,
+        help="Optional water mask file.",
+    )
+    cfg_parser.add_argument(
+        "--processor",
+        choices=("isce", "hyp3"),
+        default="isce",
+        help=(
+            "Value for mintpy.load.processor. Use 'isce' for hybrid "
+            "ISCE2/Dolphin stacks (default); 'hyp3' when every input is "
+            "a geocoded HyP3-style GeoTIFF."
+        ),
     )
     cfg_parser.add_argument(
         "--config-name", default="mintpy_config.txt",
@@ -225,10 +261,22 @@ def _cmd_generate_config(args):
         cor_dir=args.cor_dir,
         conncomp_dir=args.conncomp_dir,
         dem_file=args.dem_file,
+        inc_angle_file=args.inc_angle_file,
+        az_angle_file=args.az_angle_file,
+        lookup_y_file=args.lookup_y_file,
+        lookup_x_file=args.lookup_x_file,
+        water_mask_file=args.water_mask_file,
+        processor=args.processor,
         config_name=args.config_name,
     )
 
     print(f"Config written: {config_path}")
+    if not args.lookup_y_file or not args.lookup_x_file:
+        print(
+            "\nWARNING: --lookup-y-file / --lookup-x-file were not provided. "
+            "MintPy may fail later with 'No lookup table found' during "
+            "geocoding. Pass lat.rdr.full / lon.rdr.full to fix."
+        )
     print(f"\nNext step: smallbaselineApp.py {config_path.name}")
 
 

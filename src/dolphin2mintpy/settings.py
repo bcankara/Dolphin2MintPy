@@ -24,6 +24,13 @@ SETTINGS_KEYS = {
     "ref_xml": "ISCE2 reference XML file path",
     "ref_date": "Reference (super-master) date (YYYYMMDD)",
     "geometry_dir": "Geometry files directory (DEM, incidence, azimuth)",
+    "dem_file": "DEM file (e.g. hgt.rdr.full)",
+    "inc_angle_file": "Incidence angle file (e.g. los.rdr.full)",
+    "az_angle_file": "Azimuth angle file (e.g. los.rdr.full)",
+    "lookup_y_file": "Lookup Y / latitude file (e.g. lat.rdr.full)",
+    "lookup_x_file": "Lookup X / longitude file (e.g. lon.rdr.full)",
+    "water_mask_file": "Water mask file (optional)",
+    "mintpy_processor": "mintpy.load.processor value (isce / hyp3)",
     "work_dir": "MintPy working/output directory",
     "geometry_mode": "Geometry mode for .rsc sidecars (auto/radar/geo)",
 }

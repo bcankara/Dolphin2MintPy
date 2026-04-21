@@ -109,8 +109,95 @@ FIELDS = [
         "required": False,
         "help": (
             "Directory containing DEM, incidence angle and azimuth angle "
-            "GeoTIFFs.\n\n"
-            "Optional but recommended for geocoded MintPy analysis."
+            "rasters.\n\n"
+            "Optional helper: when set, the DEM / incidence / azimuth / "
+            "lookup file fields below are auto-populated from this folder "
+            "if matching files (hgt.rdr.full, los.rdr.full, lat.rdr.full, "
+            "lon.rdr.full) exist."
+        ),
+    },
+    {
+        "key": "dem_file",
+        "label": "DEM file",
+        "kind": "file",
+        "required": False,
+        "help": (
+            "Path to the DEM file used by MintPy — typically "
+            "hgt.rdr.full produced by ISCE2 topsStack.\n\n"
+            "Written to mintpy.load.demFile."
+        ),
+    },
+    {
+        "key": "inc_angle_file",
+        "label": "Incidence angle file",
+        "kind": "file",
+        "required": False,
+        "help": (
+            "Path to the incidence angle raster — typically "
+            "los.rdr.full (band 1) produced by ISCE2.\n\n"
+            "Written to mintpy.load.incAngleFile."
+        ),
+    },
+    {
+        "key": "az_angle_file",
+        "label": "Azimuth angle file",
+        "kind": "file",
+        "required": False,
+        "help": (
+            "Path to the azimuth angle raster — typically the same "
+            "los.rdr.full file used for the incidence angle.\n\n"
+            "Written to mintpy.load.azAngleFile."
+        ),
+    },
+    {
+        "key": "lookup_y_file",
+        "label": "Lookup Y (latitude) file",
+        "kind": "file",
+        "required": False,
+        "help": (
+            "Latitude lookup table — typically ISCE2 lat.rdr.full.\n\n"
+            "Required when the stack is in radar geometry so MintPy can "
+            "geocode results. Written to mintpy.load.lookupYFile.\n"
+            "Skipping this leads to 'No lookup table found' errors."
+        ),
+    },
+    {
+        "key": "lookup_x_file",
+        "label": "Lookup X (longitude) file",
+        "kind": "file",
+        "required": False,
+        "help": (
+            "Longitude lookup table — typically ISCE2 lon.rdr.full.\n\n"
+            "Required when the stack is in radar geometry so MintPy can "
+            "geocode results. Written to mintpy.load.lookupXFile."
+        ),
+    },
+    {
+        "key": "water_mask_file",
+        "label": "Water mask file",
+        "kind": "file",
+        "required": False,
+        "help": (
+            "Optional water mask raster.\n\n"
+            "Written to mintpy.load.waterMaskFile. Leave empty for 'auto'."
+        ),
+    },
+    {
+        "key": "mintpy_processor",
+        "label": "MintPy processor",
+        "kind": "choice",
+        "required": False,
+        "default": "isce",
+        "choices": ("isce", "hyp3"),
+        "help": (
+            "Value written to mintpy.load.processor:\n\n"
+            "  - isce: recommended when geometry files are ISCE2 "
+            "*.rdr.full outputs (hybrid ISCE2 / Dolphin pipeline).\n"
+            "  - hyp3: use when every input (ifgs + geometry) is a "
+            "geocoded HyP3-style GeoTIFF.\n\n"
+            "Note: this is independent of the PROCESSOR field inside "
+            "the .rsc sidecars, which dolphin2mintpy always writes as "
+            "'hyp3' to trigger MintPy's GDAL reader for Dolphin TIFFs."
         ),
     },
     {
@@ -145,6 +232,18 @@ FIELDS = [
         ),
     },
 ]
+
+
+# Common filename patterns for auto-populating geometry file fields
+# from a selected geometry directory. Order matters: first match wins.
+GEOMETRY_AUTOFILL = {
+    "dem_file": ("hgt.rdr.full", "hgt.rdr", "*dem*.rdr.full", "*dem*.tif", "*height*.rdr.full"),
+    "inc_angle_file": ("los.rdr.full", "los.rdr", "*inc*.rdr.full", "*incidence*.tif"),
+    "az_angle_file": ("los.rdr.full", "los.rdr", "*az*.rdr.full", "*azimuth*.tif"),
+    "lookup_y_file": ("lat.rdr.full", "lat.rdr", "lat.tif"),
+    "lookup_x_file": ("lon.rdr.full", "lon.rdr", "lon.tif"),
+    "water_mask_file": ("waterMask.rdr.full", "water_mask.tif", "*water*.tif"),
+}
 
 
 # ========================================================================
@@ -234,8 +333,8 @@ class Dolphin2MintPyApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("Dolphin2MintPy")
-        self.geometry("780x720")
-        self.minsize(680, 600)
+        self.geometry("820x900")
+        self.minsize(720, 760)
 
         self._entries: dict[str, tk.StringVar] = {}
         self._log_queue: queue.Queue[str] = queue.Queue()
@@ -447,6 +546,49 @@ class Dolphin2MintPyApp(tk.Tk):
         )
         if path:
             self._entries[key].set(path)
+            if key == "geometry_dir":
+                self._autofill_geometry_files(path)
+
+    def _autofill_geometry_files(self, geometry_dir: str) -> None:
+        """Populate empty geometry / lookup file fields from a directory.
+
+        Helps the user by filling in the DEM, incidence, azimuth and
+        (critically) lookup Y / X paths when the selected geometry
+        directory contains the expected ISCE2 topsStack file names.
+        Fields that already have a value are left untouched so the user
+        stays in control.
+        """
+        geom_dir = Path(geometry_dir)
+        if not geom_dir.is_dir():
+            return
+
+        filled: list[str] = []
+        for field_key, patterns in GEOMETRY_AUTOFILL.items():
+            if self._entries.get(field_key) is None:
+                continue
+            if self._entries[field_key].get().strip():
+                continue
+            resolved = self._first_match(geom_dir, patterns)
+            if resolved is not None:
+                self._entries[field_key].set(str(resolved))
+                filled.append(f"{field_key} -> {resolved.name}")
+
+        if filled:
+            self._log("Auto-filled from geometry directory:")
+            for line in filled:
+                self._log(f"  - {line}")
+
+    @staticmethod
+    def _first_match(directory: Path, patterns: tuple[str, ...]) -> Path | None:
+        """Return the first path inside *directory* matching any pattern."""
+        for pattern in patterns:
+            exact = directory / pattern
+            if exact.is_file():
+                return exact
+            matches = sorted(directory.glob(pattern))
+            if matches:
+                return matches[0]
+        return None
 
     def _browse_file(self, key: str) -> None:
         initial = self._entries[key].get().strip() or str(Path.cwd())
@@ -494,6 +636,24 @@ class Dolphin2MintPyApp(tk.Tk):
         ref_xml = settings.get("ref_xml")
         if ref_xml and not Path(ref_xml).is_file():
             errors.append(f"Reference XML file does not exist: {ref_xml}")
+
+        for file_key in (
+            "dem_file",
+            "inc_angle_file",
+            "az_angle_file",
+            "lookup_y_file",
+            "lookup_x_file",
+            "water_mask_file",
+        ):
+            value = settings.get(file_key)
+            if value and not Path(value).is_file():
+                errors.append(f"{file_key} does not exist: {value}")
+
+        processor = settings.get("mintpy_processor")
+        if processor and processor not in ("isce", "hyp3"):
+            errors.append(
+                f"MintPy processor must be 'isce' or 'hyp3' (got {processor!r})."
+            )
 
         ref_date = settings.get("ref_date")
         if ref_date and (len(ref_date) != 8 or not ref_date.isdigit()):
@@ -577,8 +737,21 @@ class Dolphin2MintPyApp(tk.Tk):
                 unw_dir=settings["unw_dir"],
                 cor_dir=settings.get("cor_dir"),
                 conncomp_dir=settings["unw_dir"],
+                dem_file=settings.get("dem_file"),
+                inc_angle_file=settings.get("inc_angle_file"),
+                az_angle_file=settings.get("az_angle_file"),
+                lookup_y_file=settings.get("lookup_y_file"),
+                lookup_x_file=settings.get("lookup_x_file"),
+                water_mask_file=settings.get("water_mask_file"),
+                processor=settings.get("mintpy_processor") or "isce",
             )
             self._log_queue.put(f"MintPy config written: {config_path}")
+            for key in ("lookup_y_file", "lookup_x_file"):
+                if not settings.get(key):
+                    self._log_queue.put(
+                        f"  WARNING: {key} not set -- MintPy may fail with "
+                        "'No lookup table found' during geocoding."
+                    )
             self._log_queue.put("__done__:ok")
         except Exception as exc:
             logger.exception("GUI run failed")
