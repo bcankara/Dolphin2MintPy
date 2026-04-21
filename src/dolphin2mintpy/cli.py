@@ -100,6 +100,18 @@ examples:
         "--ref-date", default=None,
         help="Reference (super-master) date in YYYYMMDD format.",
     )
+    prep_parser.add_argument(
+        "--geometry-mode",
+        choices=("auto", "radar", "geo"),
+        default="auto",
+        help=(
+            "How to populate geotransform metadata in the .rsc sidecars: "
+            "'auto' detects from the GeoTIFF (default), 'radar' forces "
+            "radar geometry (omits X_FIRST/Y_FIRST so MintPy produces "
+            "geometryRadar.h5), 'geo' forces geocoded output (emits the "
+            "geotransform so MintPy produces geometryGeo.h5)."
+        ),
+    )
 
     # --- generate-config ---
     cfg_parser = subparsers.add_parser(
@@ -192,6 +204,7 @@ def _cmd_prepare(args):
         baseline_dir=args.baseline_dir,
         ref_xml=args.ref_xml,
         ref_date=args.ref_date,
+        geometry_mode=args.geometry_mode,
     )
 
     print(f"\nDone: {result['rsc_written']} .rsc files written.")

@@ -89,8 +89,57 @@ def parse_isce_xml(xml_path):
     return vals
 
 
+# Geotransform returned by GDAL for a raster that has *no* georeference.
+# We use this to distinguish a real geocoded product from a Dolphin radar
+# geometry GeoTIFF whose geotransform GDAL fills with identity values.
+_DEFAULT_GT = (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+
+
+def _is_default_geotransform(gt, tol=1e-9):
+    """Return True when the geotransform matches GDAL's identity default."""
+    if gt is None or len(gt) < 6:
+        return True
+    return all(abs(float(gt[i]) - _DEFAULT_GT[i]) < tol for i in range(6))
+
+
+def _detect_geocoded(projection_wkt, geotransform):
+    """Decide whether a raster is truly geocoded.
+
+    A product is considered geocoded only when:
+      * it has a non-empty projection string (``GetProjection``), **and**
+      * its geotransform is not the GDAL identity default (0, 1, 0, 0, 0, 1).
+
+    Either condition alone can be misleading (Dolphin radar-geometry
+    GeoTIFFs carry the default geotransform but no projection; some tools
+    strip the CRS while keeping a valid geotransform), so we require both.
+
+    Parameters
+    ----------
+    projection_wkt : str
+        WKT projection string from ``GDALDataset.GetProjection``.
+    geotransform : sequence of float
+        Six-element geotransform from ``GDALDataset.GetGeoTransform``.
+
+    Returns
+    -------
+    (bool, str)
+        Tuple of ``(is_geocoded, reason)``. The reason string is suitable
+        for logging and debugging.
+    """
+    has_proj = bool(projection_wkt and projection_wkt.strip())
+    has_gt = not _is_default_geotransform(geotransform)
+
+    if has_proj and has_gt:
+        return True, "projection present and non-identity geotransform"
+    if has_proj and not has_gt:
+        return False, "projection present but identity geotransform (treated as radar)"
+    if not has_proj and has_gt:
+        return False, "non-identity geotransform but no projection (treated as radar)"
+    return False, "no projection and identity geotransform"
+
+
 def parse_gdal_metadata(tif_path):
-    """Read raster dimensions and geotransform from a GeoTIFF via GDAL.
+    """Read raster dimensions, geotransform and geocoded flag from GDAL.
 
     Parameters
     ----------
@@ -101,7 +150,12 @@ def parse_gdal_metadata(tif_path):
     -------
     dict
         Dictionary with keys: WIDTH, LENGTH, NUMBER_BANDS,
-        X_FIRST, Y_FIRST, X_STEP, Y_STEP, DATA_TYPE.
+        X_FIRST, Y_FIRST, X_STEP, Y_STEP, DATA_TYPE,
+        IS_GEOCODED, GEOCODED_REASON, PROJECTION_WKT.
+
+        ``IS_GEOCODED`` is a Python bool and ``GEOCODED_REASON`` is a
+        short human-readable explanation of the decision, useful for
+        log output and debugging.
 
     Raises
     ------
@@ -132,12 +186,15 @@ def parse_gdal_metadata(tif_path):
     num_bands = ds.RasterCount
 
     gt = ds.GetGeoTransform()  # (x_origin, x_step, 0, y_origin, 0, y_step)
+    projection = ds.GetProjection() or ""
+
+    is_geocoded, reason = _detect_geocoded(projection, gt)
+
     x_first = gt[0] if gt else 0.0
     y_first = gt[3] if gt else 0.0
     x_step = gt[1] if gt else 1.0
     y_step = gt[5] if gt else 1.0
 
-    # Determine data type from first band
     band = ds.GetRasterBand(1)
     gdal_dtype = gdal.GetDataTypeName(band.DataType).lower()
     dtype_map = {
@@ -161,9 +218,15 @@ def parse_gdal_metadata(tif_path):
         "X_STEP": str(x_step),
         "Y_STEP": str(y_step),
         "DATA_TYPE": data_type,
+        "IS_GEOCODED": is_geocoded,
+        "GEOCODED_REASON": reason,
+        "PROJECTION_WKT": projection,
     }
 
-    logger.debug("GDAL metadata for %s: %dx%d, %s bands", tif_path.name, width, length, num_bands)
+    logger.debug(
+        "GDAL metadata for %s: %dx%d, %s bands, geocoded=%s (%s)",
+        tif_path.name, width, length, num_bands, is_geocoded, reason,
+    )
     return meta
 
 

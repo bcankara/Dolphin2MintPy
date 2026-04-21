@@ -29,8 +29,16 @@ DEFAULT_ANTENNA_SIDE = -1  # right-looking
 # MintPy processor label used for GDAL-based reading path
 MINTPY_PROCESSOR = "hyp3"
 
-# RSC template for interferogram files
-RSC_TEMPLATE = """\
+# Supported geometry modes for .rsc generation.
+#   - "auto"  : detect from GeoTIFF projection + geotransform
+#   - "radar" : force radar geometry (no X_FIRST / Y_FIRST lines)
+#   - "geo"   : force geocoded output (always emit geotransform)
+GEOMETRY_MODES = ("auto", "radar", "geo")
+DEFAULT_GEOMETRY_MODE = "auto"
+
+# Base RSC template (common to radar and geocoded outputs). The geocoded
+# block below is appended only when the raster carries a real CRS.
+RSC_TEMPLATE_BASE = """\
 WIDTH                 {width}
 LENGTH                {length}
 FILE_LENGTH           {length}
@@ -38,10 +46,6 @@ XMIN                  0
 XMAX                  {xmax}
 YMIN                  0
 YMAX                  {ymax}
-X_FIRST               {x_first}
-Y_FIRST               {y_first}
-X_STEP                {x_step}
-Y_STEP                {y_step}
 WAVELENGTH            {wavelength}
 RANGE_PIXEL_SIZE      {range_pixel_size}
 AZIMUTH_PIXEL_SIZE    {azimuth_pixel_size}
@@ -60,6 +64,22 @@ NUMBER_BANDS          {number_bands}
 FILE_TYPE             {file_type}
 DATA_TYPE             {data_type}
 """
+
+# Geotransform block appended only in geocoded mode. The presence of
+# X_FIRST / Y_FIRST is what MintPy uses to flag a product as "geocoded".
+RSC_GEO_BLOCK = """\
+X_FIRST               {x_first}
+Y_FIRST               {y_first}
+X_STEP                {x_step}
+Y_STEP                {y_step}
+X_UNIT                {x_unit}
+Y_UNIT                {y_unit}
+"""
+
+# Backwards-compatible alias. Some third-party code and older tests may
+# still import ``RSC_TEMPLATE``; we expose the base template under that
+# name. The geocoded block must be appended explicitly when needed.
+RSC_TEMPLATE = RSC_TEMPLATE_BASE
 
 # Additional lines appended for interferogram files (unw, cor, conncomp)
 RSC_IFG_EXTRA = """\

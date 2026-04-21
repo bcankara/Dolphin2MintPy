@@ -124,6 +124,26 @@ FIELDS = [
             "Will be created if it does not exist. Default: ./mintpy"
         ),
     },
+    {
+        "key": "geometry_mode",
+        "label": "Geometry mode",
+        "kind": "choice",
+        "required": False,
+        "default": "auto",
+        "choices": ("auto", "radar", "geo"),
+        "help": (
+            "Controls whether .rsc files are written as radar or "
+            "geocoded metadata:\n\n"
+            "  - auto:  detect from the GeoTIFF (default).\n"
+            "  - radar: force radar geometry. Use when Dolphin GeoTIFFs "
+            "have no CRS (Origin=0,0 / Pixel=1,1). MintPy will then "
+            "produce geometryRadar.h5.\n"
+            "  - geo:   force geocoded output. MintPy will expect "
+            "geometryGeo.h5.\n\n"
+            "If you hit a 'geometryGeo.h5 not found' error after running, "
+            "switch to 'radar'."
+        ),
+    },
 ]
 
 
@@ -312,13 +332,21 @@ class Dolphin2MintPyApp(tk.Tk):
         var = tk.StringVar(value=field.get("default", ""))
         self._entries[key] = var
 
-        entry = ttk.Entry(parent, textvariable=var)
+        kind = field["kind"]
+        if kind == "choice":
+            entry = ttk.Combobox(
+                parent,
+                textvariable=var,
+                values=list(field.get("choices", ())),
+                state="readonly",
+            )
+        else:
+            entry = ttk.Entry(parent, textvariable=var)
         entry.grid(row=row, column=1, sticky="ew", pady=4)
 
         button_frame = ttk.Frame(parent)
         button_frame.grid(row=row, column=2, sticky="e", padx=(6, 0), pady=4)
 
-        kind = field["kind"]
         if kind == "dir" or kind == "dir_new":
             browse = ttk.Button(
                 button_frame, text="Browse...", width=10,
@@ -474,6 +502,10 @@ class Dolphin2MintPyApp(tk.Tk):
         if not settings.get("work_dir"):
             errors.append("MintPy output directory is required.")
 
+        mode = settings.get("geometry_mode")
+        if mode and mode not in ("auto", "radar", "geo"):
+            errors.append(f"Geometry mode must be auto, radar or geo (got {mode!r}).")
+
         return errors
 
     def _run_clicked(self) -> None:
@@ -526,6 +558,7 @@ class Dolphin2MintPyApp(tk.Tk):
                 ref_xml=settings.get("ref_xml"),
                 ref_date=settings.get("ref_date"),
                 progress_callback=progress_cb,
+                geometry_mode=settings.get("geometry_mode") or "auto",
             )
 
             self._log_queue.put(

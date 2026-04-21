@@ -38,12 +38,13 @@ Dolphin2MintPy is a **metadata translation layer**. It never modifies your raste
 |---|---|
 | 🖥️ **Desktop GUI**            | Tkinter interface with native file pickers and per-field `?` help tooltips. |
 | 🤖 **Smart auto-detection**   | Reference date inferred from the baseline directory with one click.         |
+| 🧭 **Radar / geo aware**      | Auto-detects radar vs geocoded stacks; `--geometry-mode` lets you override. |
 | 💾 **Persistent settings**    | Paths remembered between runs in `dolphin2mintpy_settings.json`.            |
 | ⚡ **Automated `.rsc`**        | Unwrapped, coherence, conncomp, DEM, incidence and azimuth — all covered.  |
 | 🌉 **Ready-to-run MintPy cfg**| `PROCESSOR=hyp3` routing with correct glob patterns baked in.               |
 | 🛰️ **ISCE2-aware**            | Reads reference XML (wavelength, heading, incidence, PRF) + baselines.      |
 | ⚙️ **Scriptable CLI**          | `prepare`, `generate-config`, `info` — HPC- and CI/CD-friendly.             |
-| 🧪 **Well-tested**            | GitHub Actions CI across Python 3.9–3.12 with 28+ unit tests.               |
+| 🧪 **Well-tested**            | GitHub Actions CI across Python 3.9–3.12 with 40+ unit tests.               |
 
 ---
 
@@ -89,6 +90,7 @@ Need more options? Jump to [**Installation**](#-installation) for conda/mamba/ve
 - [Usage](#-usage)
   - [Desktop GUI (default)](#1-desktop-gui-default)
   - [Non-interactive CLI](#2-non-interactive-cli)
+  - [Geometry mode (radar vs geocoded)](#3-geometry-mode-radar-vs-geocoded)
 - [Project layout](#-project-layout)
 - [Architecture](#-architecture)
 - [Development](#-development)
@@ -256,6 +258,45 @@ dolphin2mintpy info --unw-dir ./unwrapped
 ```
 
 Full argument reference: `dolphin2mintpy <subcommand> --help`.
+
+### 3. Geometry mode (radar vs geocoded)
+
+MintPy reads a stack as *radar* or *geocoded* depending on whether the `.rsc` sidecars contain `X_FIRST` / `Y_FIRST` / `X_STEP` / `Y_STEP`. Dolphin produces both flavours of GeoTIFF and the two must stay consistent with your geometry files — otherwise MintPy fails later with a cryptic `geometryGeo.h5 not found` (or `geometryRadar.h5 not found`) during `check_loaded_dataset`.
+
+Dolphin2MintPy exposes an explicit **geometry mode** so you can pick the right layout without having to hand-edit every `.rsc`.
+
+| Mode    | When to use                                                                                              |
+|---------|----------------------------------------------------------------------------------------------------------|
+| `auto`  | **Default.** Inspects the GeoTIFF (projection + geotransform) and decides automatically. Works for 95% of stacks. |
+| `radar` | Dolphin GeoTIFFs have no CRS (`Origin=0,0`, `Pixel Size=1,1`) and your geometry files are ISCE2 `*.rdr.full` in radar coordinates. MintPy will produce `geometryRadar.h5`. |
+| `geo`   | Dolphin GeoTIFFs carry a real CRS (UTM or EPSG:4326) and your geometry files are georeferenced TIFFs. MintPy will produce `geometryGeo.h5`. |
+
+Quick check with GDAL:
+
+```bash
+gdalinfo unwrapped/YYYYMMDD_YYYYMMDD.unw.tif | head -25
+# Look for:
+#   "Coordinate System is: '' ..."   -> radar geometry (use --geometry-mode radar)
+#   "Coordinate System is: PROJCS[...]" / "GEOGCS[...]" + non-zero Origin
+#                                     -> geocoded       (auto or --geometry-mode geo)
+```
+
+Overriding the detection from the CLI:
+
+```bash
+dolphin2mintpy prepare \
+    --unw-dir ./unwrapped \
+    --cor-dir ./interferograms \
+    --geometry-mode radar         # or: auto (default) / geo
+```
+
+From the GUI, use the **Geometry mode** drop-down in the Inputs panel. If you ever hit a `geometryGeo.h5` / `geometryRadar.h5` `FileNotFoundError` after `smallbaselineApp.py --dostep load_data`, re-run `dolphin2mintpy` with the opposite mode and regenerate the `.rsc` sidecars — no re-processing of the stack required.
+
+Dolphin2MintPy also logs its decision on startup, so you can verify the mode before MintPy even runs:
+
+```
+[INFO] dolphin2mintpy.prepare: Detected geometry: RADAR — auto (no projection and identity geotransform) (override with geometry_mode='radar' or 'geo' if incorrect)
+```
 
 ---
 

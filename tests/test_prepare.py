@@ -6,7 +6,7 @@ import pytest
 
 from dolphin2mintpy.prepare import prepare_rsc, prepare_stack
 
-# Mock GDAL metadata for tests without GDAL
+# Mock GDAL metadata for a truly geocoded raster (lat/lon grid).
 MOCK_GDAL_META = {
     "WIDTH": "100",
     "LENGTH": "50",
@@ -16,6 +16,24 @@ MOCK_GDAL_META = {
     "X_STEP": "0.001",
     "Y_STEP": "-0.001",
     "DATA_TYPE": "float32",
+    "IS_GEOCODED": True,
+    "GEOCODED_REASON": "projection present and non-identity geotransform",
+    "PROJECTION_WKT": 'GEOGCS["WGS 84", ...]',
+}
+
+# Mock metadata for a Dolphin radar-geometry GeoTIFF (no CRS, identity GT).
+MOCK_RADAR_META = {
+    "WIDTH": "100",
+    "LENGTH": "50",
+    "NUMBER_BANDS": "1",
+    "X_FIRST": "0.0",
+    "Y_FIRST": "0.0",
+    "X_STEP": "1.0",
+    "Y_STEP": "1.0",
+    "DATA_TYPE": "float32",
+    "IS_GEOCODED": False,
+    "GEOCODED_REASON": "no projection and identity geotransform",
+    "PROJECTION_WKT": "",
 }
 
 
@@ -136,3 +154,89 @@ class TestPrepareStack:
 
         assert len(progress_calls) > 0
         assert progress_calls[-1][0] == progress_calls[-1][1]
+
+
+class TestGeometryMode:
+    """Tests covering auto / radar / geo geometry mode behaviour."""
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_RADAR_META)
+    def test_auto_detects_radar_omits_geotransform(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        rsc_path = prepare_rsc(tif, "20240907", "20241001", 0.0)
+        content = rsc_path.read_text()
+
+        # Radar geometry → X_FIRST / Y_FIRST must NOT be written, otherwise
+        # MintPy readfile flags the product as geocoded and looks for
+        # geometryGeo.h5 instead of geometryRadar.h5.
+        assert "X_FIRST" not in content
+        assert "Y_FIRST" not in content
+        assert "X_STEP" not in content
+        assert "Y_STEP" not in content
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_GDAL_META)
+    def test_auto_detects_geo_emits_geotransform(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        rsc_path = prepare_rsc(tif, "20240907", "20241001", 0.0)
+        content = rsc_path.read_text()
+
+        assert "X_FIRST" in content
+        assert "Y_FIRST" in content
+        assert "X_STEP" in content
+        assert "Y_STEP" in content
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_GDAL_META)
+    def test_force_radar_overrides_detection(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        rsc_path = prepare_rsc(
+            tif, "20240907", "20241001", 0.0, geometry_mode="radar",
+        )
+        content = rsc_path.read_text()
+
+        assert "X_FIRST" not in content
+        assert "Y_FIRST" not in content
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_RADAR_META)
+    def test_force_geo_overrides_detection(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        rsc_path = prepare_rsc(
+            tif, "20240907", "20241001", 0.0, geometry_mode="geo",
+        )
+        content = rsc_path.read_text()
+
+        assert "X_FIRST" in content
+        assert "Y_FIRST" in content
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_RADAR_META)
+    def test_invalid_mode_raises(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        with pytest.raises(ValueError):
+            prepare_rsc(tif, "20240907", "20241001", 0.0, geometry_mode="bogus")
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_RADAR_META)
+    def test_stack_records_effective_mode(self, mock_gdal, tmp_path):
+        unw_dir = tmp_path / "unw"
+        unw_dir.mkdir()
+        (unw_dir / "20240907_20241001.unw.tif").write_bytes(b"dummy")
+
+        result = prepare_stack(unw_dir=unw_dir, geometry_mode="radar")
+        assert result["geometry_mode"] == "radar"
+        assert result["rsc_written"] == 1
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_RADAR_META)
+    def test_stack_rejects_invalid_mode(self, mock_gdal, tmp_path):
+        unw_dir = tmp_path / "unw"
+        unw_dir.mkdir()
+        (unw_dir / "20240907_20241001.unw.tif").write_bytes(b"dummy")
+
+        with pytest.raises(ValueError):
+            prepare_stack(unw_dir=unw_dir, geometry_mode="nope")

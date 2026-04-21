@@ -4,6 +4,8 @@
 import pytest
 
 from dolphin2mintpy.metadata import (
+    _detect_geocoded,
+    _is_default_geotransform,
     auto_detect_ref_date,
     compute_bperp_pair,
     extract_dates_from_filename,
@@ -102,3 +104,38 @@ class TestAutoDetectRefDate:
 
     def test_nonexistent_dir_returns_none(self):
         assert auto_detect_ref_date("/nonexistent/path") is None
+
+
+class TestDetectGeocoded:
+    """Tests for the projection + geotransform geocoded detector."""
+
+    def test_identity_geotransform_is_default(self):
+        assert _is_default_geotransform((0.0, 1.0, 0.0, 0.0, 0.0, 1.0)) is True
+
+    def test_non_identity_geotransform(self):
+        assert _is_default_geotransform((36.0, 0.001, 0, 41.0, 0, -0.001)) is False
+
+    def test_none_geotransform_treated_as_default(self):
+        assert _is_default_geotransform(None) is True
+
+    def test_real_geocoded(self):
+        wkt = 'GEOGCS["WGS 84",...]'
+        gt = (36.0, 0.001, 0.0, 41.0, 0.0, -0.001)
+        is_geo, reason = _detect_geocoded(wkt, gt)
+        assert is_geo is True
+        assert "projection" in reason
+
+    def test_dolphin_radar_geometry(self):
+        is_geo, reason = _detect_geocoded("", (0.0, 1.0, 0.0, 0.0, 0.0, 1.0))
+        assert is_geo is False
+        assert "identity" in reason
+
+    def test_projection_without_real_geotransform(self):
+        is_geo, _ = _detect_geocoded(
+            'GEOGCS["WGS 84",...]', (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+        )
+        assert is_geo is False
+
+    def test_geotransform_without_projection(self):
+        is_geo, _ = _detect_geocoded("", (36.0, 0.001, 0.0, 41.0, 0.0, -0.001))
+        assert is_geo is False

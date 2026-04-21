@@ -25,6 +25,7 @@ SETTINGS_KEYS = {
     "ref_date": "Reference (super-master) date (YYYYMMDD)",
     "geometry_dir": "Geometry files directory (DEM, incidence, azimuth)",
     "work_dir": "MintPy working/output directory",
+    "geometry_mode": "Geometry mode for .rsc sidecars (auto/radar/geo)",
 }
 
 
