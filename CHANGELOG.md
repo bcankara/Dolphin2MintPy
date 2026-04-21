@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Two-stage workflow** for Dolphin -> MintPy integration:
+  - Stage 1 (`Prepare`) writes `.rsc` sidecars + `mintpy_config.txt`.
+  - Stage 2 (`Post-Load Fix`) patches the `PROCESSOR` HDF5 attribute
+    from `hyp3` to `isce` on `ifgramStack.h5` and `geometryRadar.h5`
+    after MintPy's `load_data` step. This fixes
+    `AttributeError: Unknown InSAR processor: hyp3 to locate look up table!`.
+- New `dolphin2mintpy.postprocess` module with `fix_processor_attribute`
+  and `verify_inputs_dir` helpers (exposed on the public API).
+- CLI subcommand `dolphin2mintpy fix-processor` with `--verify-only`,
+  `--dry-run`, `--from`, `--to`, `--targets`, `--skip-lookup-check`.
+- GUI is now a two-tab notebook: `1. Prepare (pre load_data)` and
+  `2. Post-Load Fix`. The second tab has a prominent warning banner
+  explaining that it must run *after* MintPy's `load_data` step, plus
+  `Verify` and `Apply fix` buttons with their own log pane.
+- `h5py` added to runtime dependencies.
 - Dedicated GUI / CLI fields for every MintPy geometry and lookup path:
   `demFile`, `incAngleFile`, `azAngleFile`, `lookupYFile`, `lookupXFile`,
   `waterMaskFile`. The lookup table fields specifically prevent MintPy's

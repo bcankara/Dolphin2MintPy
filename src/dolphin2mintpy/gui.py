@@ -25,6 +25,11 @@ from tkinter import filedialog, messagebox, scrolledtext, ttk
 
 from dolphin2mintpy.config import generate_mintpy_config
 from dolphin2mintpy.metadata import auto_detect_ref_date, count_files
+from dolphin2mintpy.postprocess import (
+    PostProcessError,
+    fix_processor_attribute,
+    verify_inputs_dir,
+)
 from dolphin2mintpy.prepare import prepare_stack
 from dolphin2mintpy.settings import (
     SETTINGS_FILENAME,
@@ -359,6 +364,14 @@ class Dolphin2MintPyApp(tk.Tk):
         style.configure("Hint.TLabel", foreground="#666666", font=("TkDefaultFont", 8))
         style.configure("Heading.TLabel", font=("TkDefaultFont", 13, "bold"))
         style.configure("SubHeading.TLabel", foreground="#555555")
+        style.configure(
+            "Warning.TLabel",
+            foreground="#8a6d00",
+            background="#fff8d6",
+            font=("TkDefaultFont", 9),
+        )
+        style.configure("WarningTitle.TLabel", foreground="#8a6d00",
+                        font=("TkDefaultFont", 10, "bold"))
 
     def _build_widgets(self) -> None:
         outer = ttk.Frame(self, padding=12)
@@ -369,25 +382,67 @@ class Dolphin2MintPyApp(tk.Tk):
         ttk.Label(header, text="Dolphin2MintPy", style="Heading.TLabel").pack(anchor="w")
         ttk.Label(
             header,
-            text="Bridge Dolphin InSAR GeoTIFF outputs to MintPy format.",
+            text=(
+                "Two-stage bridge between Dolphin InSAR and MintPy. "
+                "Work through the tabs in order."
+            ),
             style="SubHeading.TLabel",
         ).pack(anchor="w")
 
-        form = ttk.LabelFrame(outer, text="  Inputs  ", padding=10)
+        self.notebook = ttk.Notebook(outer)
+        self.notebook.pack(fill="both", expand=True)
+
+        self._build_prepare_tab(self.notebook)
+        self._build_postprocess_tab(self.notebook)
+
+        self.status_var = tk.StringVar(value="Ready.")
+        ttk.Label(outer, textvariable=self.status_var, style="Hint.TLabel").pack(
+            anchor="w", pady=(4, 0)
+        )
+
+    def _build_prepare_tab(self, notebook: ttk.Notebook) -> None:
+        """Tab 1: generate .rsc sidecars + mintpy_config.txt."""
+        tab = ttk.Frame(notebook, padding=10)
+        notebook.add(tab, text="1. Prepare (pre load_data)")
+
+        banner = ttk.Frame(tab)
+        banner.pack(fill="x", pady=(0, 8))
+        ttk.Label(
+            banner,
+            text="Step 1 - run BEFORE smallbaselineApp.py --dostep load_data",
+            style="SubHeading.TLabel",
+        ).pack(anchor="w")
+        ttk.Label(
+            banner,
+            text=(
+                "Generates ROI_PAC .rsc sidecars next to every Dolphin "
+                "GeoTIFF and writes mintpy_config.txt in the output "
+                "directory."
+            ),
+            style="Hint.TLabel",
+            wraplength=760,
+            justify="left",
+        ).pack(anchor="w")
+
+        form = ttk.LabelFrame(tab, text="  Inputs  ", padding=10)
         form.pack(fill="x", pady=(0, 8))
         form.columnconfigure(1, weight=1)
 
         for row, field in enumerate(FIELDS):
             self._build_field_row(form, row, field)
 
-        action_bar = ttk.Frame(outer)
+        action_bar = ttk.Frame(tab)
         action_bar.pack(fill="x", pady=(0, 8))
 
-        load_btn = ttk.Button(action_bar, text="Load settings", command=self._load_settings_clicked)
+        load_btn = ttk.Button(
+            action_bar, text="Load settings", command=self._load_settings_clicked
+        )
         load_btn.pack(side="left")
         Tooltip(load_btn, f"Load previously saved settings from {SETTINGS_FILENAME}.")
 
-        save_btn = ttk.Button(action_bar, text="Save settings", command=self._save_settings_clicked)
+        save_btn = ttk.Button(
+            action_bar, text="Save settings", command=self._save_settings_clicked
+        )
         save_btn.pack(side="left", padx=(6, 0))
         Tooltip(save_btn, f"Save the current form values to {SETTINGS_FILENAME} for future runs.")
 
@@ -398,17 +453,12 @@ class Dolphin2MintPyApp(tk.Tk):
         quit_btn = ttk.Button(action_bar, text="Quit", command=self.destroy)
         quit_btn.pack(side="right", padx=(0, 6))
 
-        progress_frame = ttk.Frame(outer)
+        progress_frame = ttk.Frame(tab)
         progress_frame.pack(fill="x", pady=(0, 6))
         self.progress = ttk.Progressbar(progress_frame, mode="determinate", maximum=100)
         self.progress.pack(fill="x")
 
-        self.status_var = tk.StringVar(value="Ready.")
-        ttk.Label(progress_frame, textvariable=self.status_var, style="Hint.TLabel").pack(
-            anchor="w", pady=(2, 0)
-        )
-
-        log_frame = ttk.LabelFrame(outer, text="  Log  ", padding=6)
+        log_frame = ttk.LabelFrame(tab, text="  Log  ", padding=6)
         log_frame.pack(fill="both", expand=True)
         self.log = scrolledtext.ScrolledText(
             log_frame,
@@ -418,6 +468,177 @@ class Dolphin2MintPyApp(tk.Tk):
             font=("TkFixedFont", 9),
         )
         self.log.pack(fill="both", expand=True)
+
+        next_frame = ttk.Frame(tab)
+        next_frame.pack(fill="x", pady=(6, 0))
+        ttk.Label(
+            next_frame,
+            text="After a successful run, proceed with MintPy:",
+            style="Hint.TLabel",
+        ).pack(anchor="w")
+        ttk.Label(
+            next_frame,
+            text="    smallbaselineApp.py mintpy_config.txt --dostep load_data",
+            font=("TkFixedFont", 9),
+        ).pack(anchor="w")
+        ttk.Label(
+            next_frame,
+            text="Then switch to the '2. Post-Load Fix' tab.",
+            style="Hint.TLabel",
+        ).pack(anchor="w")
+
+    def _build_postprocess_tab(self, notebook: ttk.Notebook) -> None:
+        """Tab 2: patch PROCESSOR attribute on HDF5 files after load_data."""
+        tab = ttk.Frame(notebook, padding=10)
+        notebook.add(tab, text="2. Post-Load Fix")
+
+        warn_frame = tk.Frame(tab, bg="#fff8d6", highlightbackground="#e0c674",
+                              highlightthickness=1)
+        warn_frame.pack(fill="x", pady=(0, 10))
+        tk.Label(
+            warn_frame,
+            text="WARNING - run this step AFTER MintPy's load_data succeeds",
+            bg="#fff8d6",
+            fg="#8a6d00",
+            font=("TkDefaultFont", 10, "bold"),
+            anchor="w",
+            padx=10,
+            pady=(8, 2),
+        ).pack(fill="x")
+        tk.Label(
+            warn_frame,
+            text=(
+                "This tab rewrites the PROCESSOR attribute inside\n"
+                "    inputs/ifgramStack.h5  and  inputs/geometryRadar.h5\n"
+                "from 'hyp3' to 'isce'. Those HDF5 files only exist AFTER you run:\n"
+                "    smallbaselineApp.py mintpy_config.txt --dostep load_data\n\n"
+                "Fixes the runtime error:\n"
+                "    AttributeError: Unknown InSAR processor: hyp3 to locate look up table!"
+            ),
+            bg="#fff8d6",
+            fg="#5a4a00",
+            justify="left",
+            anchor="w",
+            padx=10,
+            pady=(0, 8),
+            font=("TkDefaultFont", 9),
+        ).pack(fill="x")
+
+        form = ttk.LabelFrame(tab, text="  Post-processing inputs  ", padding=10)
+        form.pack(fill="x", pady=(0, 8))
+        form.columnconfigure(1, weight=1)
+
+        self._post_entries: dict[str, tk.StringVar] = {}
+
+        # Row 0: inputs directory
+        ttk.Label(form, text="MintPy inputs directory  *").grid(
+            row=0, column=0, sticky="w", padx=(0, 8), pady=4
+        )
+        inputs_var = tk.StringVar(value="")
+        self._post_entries["inputs_dir"] = inputs_var
+        inputs_entry = ttk.Entry(form, textvariable=inputs_var)
+        inputs_entry.grid(row=0, column=1, sticky="ew", pady=4)
+
+        inputs_btns = ttk.Frame(form)
+        inputs_btns.grid(row=0, column=2, sticky="e", padx=(6, 0), pady=4)
+        inputs_browse = ttk.Button(
+            inputs_btns,
+            text="Browse...",
+            width=10,
+            command=lambda: self._browse_post_inputs_dir(),
+        )
+        inputs_browse.pack(side="left")
+        Tooltip(
+            inputs_browse,
+            "Select the MintPy inputs/ directory created by load_data, "
+            "e.g. /mnt/w/tubitak3501_merzifon/inputs",
+        )
+        help1 = ttk.Label(inputs_btns, text=" ? ", style="Help.TLabel",
+                          cursor="question_arrow")
+        help1.pack(side="left", padx=(6, 0))
+        Tooltip(
+            help1,
+            "The 'inputs/' folder inside your MintPy working directory. "
+            "It must already contain ifgramStack.h5 and geometryRadar.h5 "
+            "produced by 'smallbaselineApp.py --dostep load_data'.",
+        )
+
+        # Row 1: old processor
+        ttk.Label(form, text="Old processor (from)").grid(
+            row=1, column=0, sticky="w", padx=(0, 8), pady=4
+        )
+        old_var = tk.StringVar(value="hyp3")
+        self._post_entries["old_processor"] = old_var
+        ttk.Combobox(
+            form, textvariable=old_var, values=("hyp3", "isce"), state="readonly"
+        ).grid(row=1, column=1, sticky="ew", pady=4)
+
+        # Row 2: new processor
+        ttk.Label(form, text="New processor (to)").grid(
+            row=2, column=0, sticky="w", padx=(0, 8), pady=4
+        )
+        new_var = tk.StringVar(value="isce")
+        self._post_entries["new_processor"] = new_var
+        ttk.Combobox(
+            form, textvariable=new_var, values=("isce", "hyp3"), state="readonly"
+        ).grid(row=2, column=1, sticky="ew", pady=4)
+
+        # Row 3: target files
+        ttk.Label(form, text="Target files (comma separated)").grid(
+            row=3, column=0, sticky="w", padx=(0, 8), pady=4
+        )
+        targets_var = tk.StringVar(value="ifgramStack.h5, geometryRadar.h5")
+        self._post_entries["target_files"] = targets_var
+        ttk.Entry(form, textvariable=targets_var).grid(
+            row=3, column=1, sticky="ew", pady=4
+        )
+
+        action_bar = ttk.Frame(tab)
+        action_bar.pack(fill="x", pady=(0, 6))
+
+        verify_btn = ttk.Button(
+            action_bar, text="Verify", command=self._post_verify_clicked
+        )
+        verify_btn.pack(side="left")
+        Tooltip(
+            verify_btn,
+            "Inspect the inputs/ directory: report current PROCESSOR "
+            "values and check that /latitude + /longitude datasets exist.",
+        )
+
+        self.post_apply_btn = ttk.Button(
+            action_bar, text="Apply fix", command=self._post_apply_clicked
+        )
+        self.post_apply_btn.pack(side="left", padx=(6, 0))
+        Tooltip(
+            self.post_apply_btn,
+            "Rewrite PROCESSOR / INSAR_PROCESSOR HDF5 attributes "
+            "(hyp3 -> isce by default).",
+        )
+
+        log_frame = ttk.LabelFrame(tab, text="  Post-processing log  ", padding=6)
+        log_frame.pack(fill="both", expand=True)
+        self.post_log = scrolledtext.ScrolledText(
+            log_frame,
+            height=12,
+            state="disabled",
+            wrap="word",
+            font=("TkFixedFont", 9),
+        )
+        self.post_log.pack(fill="both", expand=True)
+
+        next_frame = ttk.Frame(tab)
+        next_frame.pack(fill="x", pady=(6, 0))
+        ttk.Label(
+            next_frame,
+            text="After a successful patch, resume the full MintPy chain:",
+            style="Hint.TLabel",
+        ).pack(anchor="w")
+        ttk.Label(
+            next_frame,
+            text="    smallbaselineApp.py mintpy_config.txt",
+            font=("TkFixedFont", 9),
+        ).pack(anchor="w")
 
     def _build_field_row(self, parent: ttk.Frame, row: int, field: dict) -> None:
         """Render one labelled input row with picker + help icon."""
@@ -793,6 +1014,150 @@ class Dolphin2MintPyApp(tk.Tk):
         self.log.insert("end", message + "\n")
         self.log.see("end")
         self.log.configure(state="disabled")
+
+    # ------------------------------------------------------------------
+    # Post-load fix tab
+    # ------------------------------------------------------------------
+    def _browse_post_inputs_dir(self) -> None:
+        initial = self._post_entries["inputs_dir"].get().strip() or str(Path.cwd())
+        if not Path(initial).is_dir():
+            initial = str(Path.cwd())
+        path = filedialog.askdirectory(
+            title="Select MintPy inputs/ directory",
+            initialdir=initial,
+            mustexist=True,
+        )
+        if path:
+            self._post_entries["inputs_dir"].set(path)
+
+    def _post_collect(self) -> dict:
+        raw_targets = self._post_entries["target_files"].get().strip()
+        targets = tuple(
+            t.strip() for t in raw_targets.split(",") if t.strip()
+        ) or ("ifgramStack.h5", "geometryRadar.h5")
+        return {
+            "inputs_dir": self._post_entries["inputs_dir"].get().strip(),
+            "old_processor": self._post_entries["old_processor"].get().strip() or "hyp3",
+            "new_processor": self._post_entries["new_processor"].get().strip() or "isce",
+            "target_files": targets,
+        }
+
+    def _post_log(self, message: str) -> None:
+        self.post_log.configure(state="normal")
+        self.post_log.insert("end", message + "\n")
+        self.post_log.see("end")
+        self.post_log.configure(state="disabled")
+
+    def _post_verify_clicked(self) -> None:
+        params = self._post_collect()
+        if not params["inputs_dir"]:
+            messagebox.showerror(
+                "Verify",
+                "Please select the MintPy inputs/ directory first.",
+            )
+            return
+        if not Path(params["inputs_dir"]).is_dir():
+            messagebox.showerror(
+                "Verify",
+                f"Directory does not exist: {params['inputs_dir']}",
+            )
+            return
+
+        self._post_log(f"--- Verifying {params['inputs_dir']} ---")
+        try:
+            report = verify_inputs_dir(
+                params["inputs_dir"],
+                target_files=params["target_files"],
+                expected_old=params["old_processor"],
+            )
+        except PostProcessError as exc:
+            self._post_log(f"ERROR: {exc}")
+            messagebox.showerror("Verify", str(exc))
+            return
+
+        any_missing_lookup = False
+        for entry in report:
+            tag = "OK" if entry["exists"] else "MISSING"
+            self._post_log(f"[{tag}] {entry['path'].name}")
+            if entry["exists"]:
+                self._post_log(f"      PROCESSOR        : {entry['processor']}")
+                self._post_log(f"      INSAR_PROCESSOR  : {entry['insar_processor']}")
+                if entry["has_lat_lon"] is not None:
+                    self._post_log(f"      has /lat /lon    : {entry['has_lat_lon']}")
+                    if entry["has_lat_lon"] is False:
+                        any_missing_lookup = True
+                self._post_log(f"      needs patch      : {entry['needs_patch']}")
+            for issue in entry["issues"]:
+                self._post_log(f"      ! {issue}")
+        self._post_log("")
+        self.status_var.set(
+            "Verify complete."
+            + (" Missing lookup datasets - see log." if any_missing_lookup else "")
+        )
+
+    def _post_apply_clicked(self) -> None:
+        params = self._post_collect()
+        if not params["inputs_dir"]:
+            messagebox.showerror(
+                "Apply fix",
+                "Please select the MintPy inputs/ directory first.",
+            )
+            return
+        if not Path(params["inputs_dir"]).is_dir():
+            messagebox.showerror(
+                "Apply fix",
+                f"Directory does not exist: {params['inputs_dir']}",
+            )
+            return
+        if not messagebox.askyesno(
+            "Apply fix",
+            f"Rewrite PROCESSOR attribute in:\n"
+            f"  {', '.join(params['target_files'])}\n\n"
+            f"{params['old_processor']!r} -> {params['new_processor']!r}\n\n"
+            "Are you sure 'smallbaselineApp.py --dostep load_data' "
+            "has already completed successfully?",
+        ):
+            return
+
+        self._post_log(
+            f"--- Applying fix: {params['old_processor']} -> "
+            f"{params['new_processor']} ---"
+        )
+        self.post_apply_btn.configure(state="disabled")
+        try:
+            summary = fix_processor_attribute(
+                inputs_dir=params["inputs_dir"],
+                old=params["old_processor"],
+                new=params["new_processor"],
+                target_files=params["target_files"],
+                dry_run=False,
+                require_lookup_datasets=True,
+            )
+        except PostProcessError as exc:
+            self._post_log(f"ERROR: {exc}")
+            messagebox.showerror("Apply fix", str(exc))
+            return
+        finally:
+            self.post_apply_btn.configure(state="normal")
+
+        for record in summary["details"]:
+            self._post_log(f"  - {record['message']}")
+        self._post_log(
+            f"Done: patched={summary['patched']}, "
+            f"skipped={summary['skipped']}, errors={len(summary['errors'])}."
+        )
+        self.status_var.set(
+            f"Post-load fix: patched={summary['patched']}, "
+            f"skipped={summary['skipped']}."
+        )
+
+        if summary["patched"] > 0:
+            messagebox.showinfo(
+                "Apply fix",
+                f"Patched {summary['patched']} file(s).\n\n"
+                "Next step:\n"
+                "    smallbaselineApp.py mintpy_config.txt",
+            )
 
 
 # ========================================================================

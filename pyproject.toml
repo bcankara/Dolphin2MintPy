@@ -37,6 +37,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
+    "h5py",
 ]
 
 [project.optional-dependencies]

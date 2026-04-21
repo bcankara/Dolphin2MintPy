@@ -9,10 +9,18 @@ MintPy-compatible configuration templates.
 __version__ = "0.1.0"
 __author__ = "Burak Can Kara"
 
+from dolphin2mintpy.postprocess import (
+    PostProcessError,
+    fix_processor_attribute,
+    verify_inputs_dir,
+)
 from dolphin2mintpy.prepare import prepare_rsc, prepare_stack
 
 __all__ = [
     "__version__",
     "prepare_rsc",
     "prepare_stack",
+    "fix_processor_attribute",
+    "verify_inputs_dir",
+    "PostProcessError",
 ]

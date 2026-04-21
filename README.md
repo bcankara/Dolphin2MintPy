@@ -25,10 +25,10 @@
 </p>
 
 <p align="center">
-  <b>ISCE2 topsStack</b> → <b>Dolphin</b> (phase linking + SNAPHU) → <b>Dolphin2MintPy</b> <i>(this project)</i> → <b>MintPy</b> time-series analysis
+  <b>ISCE2 topsStack</b> → <b>Dolphin</b> (phase linking + SNAPHU) → <b>Dolphin2MintPy · Stage 1 (Prepare)</b> → <b>MintPy <code>load_data</code></b> → <b>Dolphin2MintPy · Stage 2 (Post-Load Fix)</b> → <b>MintPy SBAS chain</b>
 </p>
 
-Dolphin2MintPy is a **metadata translation layer**. It never modifies your rasters — it only writes lightweight ROI_PAC-style `.rsc` sidecar files next to your GeoTIFFs and emits a ready-to-run MintPy `smallbaselineApp.cfg` so the transition from Dolphin to MintPy becomes a one-click step.
+Dolphin2MintPy is a **two-stage metadata translation layer**. It never modifies your rasters. Stage 1 writes lightweight ROI_PAC-style `.rsc` sidecar files next to your GeoTIFFs and emits a ready-to-run MintPy configuration. Stage 2 patches the `PROCESSOR` attribute inside the HDF5 files that MintPy produces during `load_data`, so the rest of the SBAS chain can run unmodified.
 
 ---
 
@@ -36,7 +36,8 @@ Dolphin2MintPy is a **metadata translation layer**. It never modifies your raste
 
 |   |   |
 |---|---|
-| 🖥️ **Desktop GUI**            | Tkinter interface with native file pickers and per-field `?` help tooltips. |
+| 🖥️ **Desktop GUI**            | Tkinter interface with native file pickers, per-field `?` tooltips, and a two-tab workflow (Prepare → Post-Load Fix). |
+| 🧪 **Post-load HDF5 fix**     | Dedicated Tab 2 / `fix-processor` CLI patches the `PROCESSOR` attribute (`hyp3 → isce`) on `ifgramStack.h5` + `geometryRadar.h5` after MintPy's `load_data` step. |
 | 🤖 **Smart auto-detection**   | Reference date inferred from the baseline directory with one click.         |
 | 🧭 **Radar / geo aware**      | Auto-detects radar vs geocoded stacks; `--geometry-mode` lets you override. |
 | 💾 **Persistent settings**    | Paths remembered between runs in `dolphin2mintpy_settings.json`.            |
@@ -220,6 +221,19 @@ dolphin2mintpy --help
 
 ## 🛠️ Usage
 
+### 🧭 Two-stage workflow at a glance
+
+Dolphin2MintPy is intentionally split into **two stages** because the MintPy pipeline needs different metadata at different moments. Run each stage at the indicated point — mixing the order reproduces the exact runtime errors you are trying to avoid.
+
+| Stage | When to run                                                                 | What it does                                                                            | Command / UI                                                                                       |
+|-------|-----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| **1** | Right after Dolphin + SNAPHU produce the interferograms, **before** MintPy. | Generates `.rsc` sidecars next to every GeoTIFF and writes `mintpy_config.txt`.         | GUI tab `1. Prepare` · CLI `dolphin2mintpy prepare` + `dolphin2mintpy generate-config`              |
+| **–** | MintPy itself.                                                              | Loads the stack into `inputs/ifgramStack.h5` and `inputs/geometryRadar.h5`.            | `smallbaselineApp.py mintpy_config.txt --dostep load_data`                                          |
+| **2** | **After** `load_data` succeeds, **before** any other MintPy step.           | Patches `PROCESSOR` (`hyp3 → isce`) inside the two HDF5 files so MintPy's lookup logic accepts them. | GUI tab `2. Post-Load Fix` · CLI `dolphin2mintpy fix-processor --inputs-dir ./inputs`               |
+| **–** | MintPy itself.                                                              | Resumes the full SBAS chain (`modify_network` → `velocity` → `geocode`).                | `smallbaselineApp.py mintpy_config.txt`                                                             |
+
+> Why two stages? During `load_data`, MintPy must use its **GDAL reader** to decompress Dolphin's LZW-compressed GeoTIFFs — that is triggered by `PROCESSOR=hyp3`. But once the stack is loaded, `check_loaded_dataset()` re-uses the same label to pick a lookup-table search strategy, and `hyp3` assumes geocoded data. Flipping the label to `isce` after loading is what unlocks the radar-geometry lookup path (`/latitude` + `/longitude`).
+
 ### 1. Desktop GUI (default)
 
 Running `dolphin2mintpy` with no arguments opens the graphical interface:
@@ -227,6 +241,15 @@ Running `dolphin2mintpy` with no arguments opens the graphical interface:
 ```bash
 dolphin2mintpy        # same as: dolphin2mintpy gui
 ```
+
+The window is organised as a **two-tab notebook** that mirrors the workflow above:
+
+| Tab                      | Purpose                                                                                                        |
+|--------------------------|----------------------------------------------------------------------------------------------------------------|
+| **1. Prepare**           | All Dolphin → MintPy pre-`load_data` inputs: unwrapped / coherence / conncomp directories, baselines, reference XML, geometry files, lookup tables, MintPy output directory, geometry mode. Writes `.rsc` sidecars and `mintpy_config.txt`. |
+| **2. Post-Load Fix**     | Select the MintPy `inputs/` directory produced by `load_data`, press **Verify** to inspect the current `PROCESSOR` value, then **Apply fix** to rewrite `hyp3 → isce` on `ifgramStack.h5` and `geometryRadar.h5`. A verification step refuses to run if `/latitude` or `/longitude` datasets are missing from `geometryRadar.h5`. |
+
+Common UI helpers apply to both tabs:
 
 | Element                       | What it does                                                                                              |
 |-------------------------------|-----------------------------------------------------------------------------------------------------------|
@@ -263,6 +286,22 @@ dolphin2mintpy generate-config \
 
 # Inspect a Dolphin stack (file counts, date range, ref date)
 dolphin2mintpy info --unw-dir ./unwrapped
+
+# ---------- Now run MintPy's load_data step ----------
+#   smallbaselineApp.py mintpy_config.txt --dostep load_data
+#
+# ---------- Then patch the HDF5 PROCESSOR attribute ----------
+# Verify first (read-only):
+dolphin2mintpy fix-processor \
+    --inputs-dir ./mintpy/inputs \
+    --verify-only
+
+# Apply the hyp3 -> isce patch on ifgramStack.h5 + geometryRadar.h5
+dolphin2mintpy fix-processor \
+    --inputs-dir ./mintpy/inputs
+
+# Finally run the full SBAS chain:
+#   smallbaselineApp.py mintpy_config.txt
 ```
 
 Full argument reference: `dolphin2mintpy <subcommand> --help`.
@@ -306,18 +345,21 @@ Dolphin2MintPy also logs its decision on startup, so you can verify the mode bef
 [INFO] dolphin2mintpy.prepare: Detected geometry: RADAR — auto (no projection and identity geotransform) (override with geometry_mode='radar' or 'geo' if incorrect)
 ```
 
-### 4. Geometry & lookup table fields (avoiding the four classic MintPy errors)
+### 4. The five classic MintPy failures — and which field / command fixes each
 
-When Dolphin's GeoTIFF outputs are combined with ISCE2 topsStack geometry files, four MintPy failures commonly show up. Dolphin2MintPy addresses each by explicitly asking for the matching path (in the GUI *and* the CLI):
+When Dolphin's GeoTIFF outputs are combined with ISCE2 topsStack geometry files, five MintPy errors tend to surface one after another. Dolphin2MintPy addresses each one explicitly:
 
-| MintPy error                                                        | Root cause                                                                             | Field to populate                                                |
-|---------------------------------------------------------------------|----------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| `KeyError: 'DATE12'`                                                | MintPy could not build ROI_PAC metadata from Dolphin TIFFs.                            | Automatic — `.rsc` sidecars with `DATE12` + `P_BASELINE_TOP_HDR`. |
-| `ValueError: cannot reshape array of size ...`                      | `PROCESSOR=isce` forced a raw-binary read of a compressed GeoTIFF.                     | Automatic — `.rsc` now writes `PROCESSOR=hyp3` to use GDAL.       |
-| `FileNotFoundError: inputs/geometryGeo.h5`                          | `Y_FIRST`/`X_FIRST=0` flagged the stack as geocoded although it was radar geometry.    | `Geometry mode = radar` (GUI) / `--geometry-mode radar` (CLI).    |
-| `FileNotFoundError: No lookup table (longitude or rangeCoord) found`| MintPy needs `latitude` / `longitude` datasets to geocode radar results.               | **Lookup Y (latitude) file** + **Lookup X (longitude) file** — typically `lat.rdr.full` and `lon.rdr.full`. |
+| #  | MintPy error                                                         | When it happens          | Root cause                                                                         | Where to fix                                                                 |
+|----|----------------------------------------------------------------------|--------------------------|------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
+| 1  | `KeyError: 'DATE12'`                                                 | during `load_data`       | MintPy could not build ROI_PAC metadata from Dolphin TIFFs.                        | **Tab 1 / prepare** — `.rsc` sidecars with `DATE12` + `P_BASELINE_TOP_HDR`.   |
+| 2  | `ValueError: cannot reshape array of size ...`                       | during `load_data`       | `PROCESSOR=isce` forced a raw-binary read of a compressed GeoTIFF.                 | **Tab 1 / prepare** — `.rsc` writes `PROCESSOR=hyp3` to use GDAL.             |
+| 3  | `FileNotFoundError: inputs/geometryGeo.h5`                           | during `load_data`       | `Y_FIRST`/`X_FIRST=0` flagged the stack as geocoded although it was radar geometry.| **Tab 1 / prepare** — `Geometry mode = radar` (GUI) / `--geometry-mode radar`.|
+| 4  | `FileNotFoundError: No lookup table (longitude or rangeCoord) found` | during `load_data`       | Missing `latitude` / `longitude` lookup paths in the MintPy config.                | **Tab 1 / prepare** — Lookup Y (`lat.rdr.full`) + Lookup X (`lon.rdr.full`).  |
+| 5  | `AttributeError: Unknown InSAR processor: hyp3 to locate look up table!` | **AFTER** `load_data`    | The `PROCESSOR=hyp3` label needed for GDAL ingest now breaks `check_loaded_dataset()`. | **Tab 2 / Post-Load Fix** — `dolphin2mintpy fix-processor --inputs-dir ./inputs`. |
 
 Point the **Geometry directory** field at the ISCE2 `geom_reference/` folder and the GUI auto-fills the DEM, incidence, azimuth and lookup file paths for you. From the CLI, pass the six paths explicitly to `generate-config` (see the example above).
+
+> Errors #1–#4 are caught by **Tab 1 (Prepare)**. Error #5 is caught by **Tab 2 (Post-Load Fix)**. Tab 2 is a lightweight HDF5 patch — no rasters are re-processed and the step takes well under a second.
 
 ---
 
@@ -326,14 +368,15 @@ Point the **Geometry directory** field at the ISCE2 `geom_reference/` folder and
 ```
 Dolphin2MintPy/
 ├── src/dolphin2mintpy/
-│   ├── cli.py          Argparse entry point, subcommand dispatch
-│   ├── gui.py          Tkinter desktop interface (GUI + tooltips + worker)
-│   ├── prepare.py      Core .rsc generation engine
+│   ├── cli.py          Argparse entry point (prepare, generate-config, fix-processor, info)
+│   ├── gui.py          Tkinter desktop interface (two-tab notebook + worker)
+│   ├── prepare.py      Core .rsc generation engine (Stage 1)
+│   ├── postprocess.py  Post-load HDF5 PROCESSOR patcher (Stage 2)
 │   ├── metadata.py     ISCE2 XML, GDAL, and baseline parsers
 │   ├── config.py       MintPy smallbaselineApp.cfg template generator
 │   ├── settings.py     JSON settings persistence (dolphin2mintpy_settings.json)
 │   ├── constants.py    Sentinel-1 defaults, RSC templates
-│   └── __init__.py     Public API: prepare_rsc, prepare_stack
+│   └── __init__.py     Public API: prepare_rsc, prepare_stack, fix_processor_attribute
 ├── tests/              pytest suite (CLI, metadata, prepare)
 ├── examples/           Sample configuration and end-to-end workflow
 ├── docs/

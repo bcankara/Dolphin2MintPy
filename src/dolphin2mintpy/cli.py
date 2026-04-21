@@ -180,6 +180,54 @@ examples:
         help="Output config filename. Default: mintpy_config.txt.",
     )
 
+    # --- fix-processor ---
+    fix_parser = subparsers.add_parser(
+        "fix-processor",
+        help="Patch PROCESSOR HDF5 attribute (post 'load_data' step).",
+        description=(
+            "Rewrite the PROCESSOR / INSAR_PROCESSOR attributes inside "
+            "MintPy's inputs/ifgramStack.h5 and inputs/geometryRadar.h5 "
+            "(hyp3 -> isce by default). Run this AFTER "
+            "'smallbaselineApp.py --dostep load_data' has succeeded. "
+            "Fixes 'AttributeError: Unknown InSAR processor: hyp3 to "
+            "locate look up table!'"
+        ),
+    )
+    fix_parser.add_argument(
+        "--inputs-dir", required=True,
+        help="MintPy inputs/ directory (e.g. ./mintpy/inputs).",
+    )
+    fix_parser.add_argument(
+        "--from", dest="old_processor", default="hyp3",
+        help="Current PROCESSOR value to replace. Default: hyp3.",
+    )
+    fix_parser.add_argument(
+        "--to", dest="new_processor", default="isce",
+        help="New PROCESSOR value. Default: isce.",
+    )
+    fix_parser.add_argument(
+        "--targets", nargs="+",
+        default=["ifgramStack.h5", "geometryRadar.h5"],
+        help=(
+            "HDF5 files to patch. Default: ifgramStack.h5 geometryRadar.h5."
+        ),
+    )
+    fix_parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Report what would change without modifying anything.",
+    )
+    fix_parser.add_argument(
+        "--verify-only", action="store_true",
+        help="Only inspect the inputs directory; do not modify files.",
+    )
+    fix_parser.add_argument(
+        "--skip-lookup-check", action="store_true",
+        help=(
+            "Allow patching even when geometryRadar.h5 lacks /latitude "
+            "or /longitude datasets (not recommended)."
+        ),
+    )
+
     # --- info ---
     info_parser = subparsers.add_parser(
         "info",
@@ -214,6 +262,8 @@ examples:
         _cmd_prepare(parsed)
     elif parsed.command == "generate-config":
         _cmd_generate_config(parsed)
+    elif parsed.command == "fix-processor":
+        _cmd_fix_processor(parsed)
     elif parsed.command == "info":
         _cmd_info(parsed)
     else:
@@ -278,6 +328,84 @@ def _cmd_generate_config(args):
             "geocoding. Pass lat.rdr.full / lon.rdr.full to fix."
         )
     print(f"\nNext step: smallbaselineApp.py {config_path.name}")
+
+
+def _cmd_fix_processor(args):
+    """Patch PROCESSOR HDF5 attributes after MintPy load_data."""
+    from dolphin2mintpy.postprocess import (
+        PostProcessError,
+        fix_processor_attribute,
+        verify_inputs_dir,
+    )
+
+    print(f"\n[dolphin2mintpy fix-processor] inputs dir: {args.inputs_dir}")
+
+    try:
+        report = verify_inputs_dir(
+            args.inputs_dir,
+            target_files=tuple(args.targets),
+            expected_old=args.old_processor,
+        )
+    except PostProcessError as exc:
+        print(f"ERROR: {exc}")
+        sys.exit(3)
+
+    print("\n-- Verification --")
+    for entry in report:
+        tag = "OK " if entry["exists"] else "MISS"
+        print(f"  [{tag}] {entry['path'].name}")
+        print(f"        exists           : {entry['exists']}")
+        if entry["exists"]:
+            print(f"        PROCESSOR        : {entry['processor']}")
+            print(f"        INSAR_PROCESSOR  : {entry['insar_processor']}")
+            if entry["has_lat_lon"] is not None:
+                print(f"        has /lat /lon    : {entry['has_lat_lon']}")
+            print(f"        needs patch      : {entry['needs_patch']}")
+        for issue in entry["issues"]:
+            print(f"        ! {issue}")
+
+    if args.verify_only:
+        return
+
+    missing_lookup = any(
+        e["exists"] and e["has_lat_lon"] is False for e in report
+    )
+    if missing_lookup and not args.skip_lookup_check:
+        print(
+            "\nERROR: geometryRadar.h5 is missing /latitude or /longitude "
+            "datasets. Delete it and re-run 'smallbaselineApp.py --dostep "
+            "load_data' first, or pass --skip-lookup-check to force."
+        )
+        sys.exit(4)
+
+    print("\n-- Applying patch --" if not args.dry_run else "\n-- Dry run --")
+    try:
+        summary = fix_processor_attribute(
+            inputs_dir=args.inputs_dir,
+            old=args.old_processor,
+            new=args.new_processor,
+            target_files=tuple(args.targets),
+            dry_run=args.dry_run,
+            require_lookup_datasets=not args.skip_lookup_check,
+        )
+    except PostProcessError as exc:
+        print(f"ERROR: {exc}")
+        sys.exit(5)
+
+    for record in summary["details"]:
+        print(f"  - {record['message']}")
+
+    print(
+        f"\nDone: patched={summary['patched']}, "
+        f"skipped={summary['skipped']}, errors={len(summary['errors'])}."
+    )
+    if summary["errors"]:
+        sys.exit(2)
+    if summary["patched"] > 0 and not args.dry_run:
+        print(
+            "\nNext step: smallbaselineApp.py mintpy_config.txt "
+            "(resume the full SBAS chain)."
+        )
 
 
 def _cmd_info(args):
