@@ -52,13 +52,66 @@ Dolphin2MintPy is a **two-stage metadata translation layer**. It never modifies 
 
 ## 👀 See it in action
 
-<p align="center">
-  <img src="docs/images/gui_preview.png" alt="Dolphin2MintPy GUI" width="720">
-</p>
+The desktop GUI follows the two-stage workflow: **Tab 1** prepares everything MintPy's `load_data` step needs, **Tab 2** patches the HDF5 stack MintPy just produced so the rest of the SBAS chain can run.
 
-<p align="center">
-  <i>The desktop GUI — native file pickers, per-field tooltips, auto-detect, progress log.</i>
-</p>
+<table>
+<tr>
+<td align="center" width="50%">
+  <img src="docs/images/gui_preview_1.png" alt="Dolphin2MintPy GUI — Tab 1: Prepare" width="420"><br>
+  <b>Tab 1 · Prepare (pre <code>load_data</code>)</b>
+</td>
+<td align="center" width="50%">
+  <img src="docs/images/gui_preview_2.png" alt="Dolphin2MintPy GUI — Tab 2: Post-Load Fix" width="420"><br>
+  <b>Tab 2 · Post-Load Fix</b>
+</td>
+</tr>
+</table>
+
+### 🗂️ Tab 1 · Prepare (pre `load_data`) — what it does
+
+Run this **before** calling `smallbaselineApp.py --dostep load_data`. Fill in every path that points at your Dolphin outputs and ISCE2 topsStack geometry, then press **Run**. The tab does two things in a single background-worker pass:
+
+1. **Writes an ROI_PAC `.rsc` sidecar next to every GeoTIFF** in the unwrapped / coherence / conncomp directories, so MintPy can discover `DATE12`, `P_BASELINE_TOP_HDR`, `WAVELENGTH`, `RANGE_PIXEL_SIZE`, etc. without running `prep_isce.py`.
+2. **Generates `mintpy_config.txt`** in the MintPy output directory, pre-populated with the processor, geometry files, lookup tables and network-inversion defaults that match a hybrid ISCE2/Dolphin stack.
+
+| Field                          | What it maps to                                                                          |
+|--------------------------------|------------------------------------------------------------------------------------------|
+| **Unwrapped / Coherence / Baseline / Reference XML / Reference date** | Inputs for `.rsc` generation (date pairs, baselines, radar parameters). |
+| **Geometry directory**         | Optional convenience — auto-fills the six file fields below from an ISCE2 `geom_reference/` folder. |
+| **DEM file**                   | `mintpy.load.demFile` (typically `hgt.rdr.full`).                                         |
+| **Incidence / Azimuth angle**  | `mintpy.load.incAngleFile` / `azAngleFile` (typically `los.rdr.full`).                    |
+| **Lookup Y (latitude) file**   | `mintpy.load.lookupYFile` — required so MintPy can geocode later (`lat.rdr.full`).        |
+| **Lookup X (longitude) file**  | `mintpy.load.lookupXFile` — required so MintPy can geocode later (`lon.rdr.full`).        |
+| **Water mask file**            | `mintpy.load.waterMaskFile` (optional).                                                   |
+| **MintPy processor**           | Value written to `mintpy.load.processor` (`isce` for hybrid stacks, `hyp3` for fully geocoded HyP3 products). |
+| **MintPy output directory**    | Where `mintpy_config.txt` is written.                                                     |
+| **Geometry mode**              | `auto` / `radar` / `geo` — forces the layout of `.rsc` sidecars when auto-detection gets it wrong. |
+
+> Use the `Load settings` / `Save settings` buttons to persist every path in `dolphin2mintpy_settings.json` so the form reopens pre-filled next time.
+
+### 🧪 Tab 2 · Post-Load Fix — what it does
+
+Run this **after** `smallbaselineApp.py mintpy_config.txt --dostep load_data` has finished and produced `inputs/ifgramStack.h5` + `inputs/geometryRadar.h5`. The yellow warning banner at the top of the tab exists to keep you from running it too early.
+
+The problem this tab solves is very specific: during `load_data`, MintPy needs `PROCESSOR=hyp3` on the Dolphin GeoTIFFs so it uses its GDAL reader (the ISCE path would try a raw-binary read and fail on LZW-compressed TIFFs). But once the HDF5 files exist, `check_loaded_dataset()` re-interprets the same `hyp3` label as "geocoded" and refuses to look up `/latitude` + `/longitude`, raising:
+
+    AttributeError: Unknown InSAR processor: hyp3 to locate look up table!
+
+Tab 2 fixes this by rewriting the HDF5 `PROCESSOR` (and `INSAR_PROCESSOR`) attributes from `hyp3` to `isce` on the already-loaded stack — no rasters are re-processed, the patch takes well under a second.
+
+| Field                          | What it does                                                                              |
+|--------------------------------|-------------------------------------------------------------------------------------------|
+| **MintPy inputs directory**    | The `inputs/` folder produced by `load_data` (e.g. `.../tubitak3501_merzifon/inputs`).    |
+| **Old processor (from)**       | Current value to replace. Default: `hyp3`.                                                |
+| **New processor (to)**         | Replacement value. Default: `isce`.                                                       |
+| **Target files**               | Comma-separated HDF5 file list. Default: `ifgramStack.h5, geometryRadar.h5`.              |
+
+| Button                         | What it does                                                                              |
+|--------------------------------|-------------------------------------------------------------------------------------------|
+| **Verify**                     | Read-only inspection: prints current `PROCESSOR` values and checks that `/latitude` + `/longitude` datasets exist in `geometryRadar.h5`. |
+| **Apply fix**                  | Rewrites the HDF5 attributes. Refuses to run if the lookup datasets are missing (delete `geometryRadar.h5` and re-run `load_data` first). |
+
+After a successful patch, resume the full SBAS chain with `smallbaselineApp.py mintpy_config.txt` as usual.
 
 ---
 
