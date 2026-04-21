@@ -503,8 +503,8 @@ class Dolphin2MintPyApp(tk.Tk):
             font=("TkDefaultFont", 10, "bold"),
             anchor="w",
             padx=10,
-            pady=(8, 2),
-        ).pack(fill="x")
+            pady=2,
+        ).pack(fill="x", pady=(8, 0))
         tk.Label(
             warn_frame,
             text=(
@@ -520,9 +520,9 @@ class Dolphin2MintPyApp(tk.Tk):
             justify="left",
             anchor="w",
             padx=10,
-            pady=(0, 8),
+            pady=2,
             font=("TkDefaultFont", 9),
-        ).pack(fill="x")
+        ).pack(fill="x", pady=(0, 8))
 
         form = ttk.LabelFrame(tab, text="  Post-processing inputs  ", padding=10)
         form.pack(fill="x", pady=(0, 8))
