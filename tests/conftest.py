@@ -30,7 +30,12 @@ def tmp_workspace(tmp_path):
 
 @pytest.fixture
 def sample_xml(tmp_workspace):
-    """Create a minimal ISCE2-style reference XML file."""
+    """Create a minimal ISCE2-style reference XML file.
+
+    Includes ``sensingStart`` / ``sensingStop`` so tests can exercise
+    the ``CENTER_LINE_UTC`` derivation path used by MintPy's
+    ``correct_troposphere`` step.
+    """
     xml_content = """\
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="IW2">
@@ -48,6 +53,12 @@ def sample_xml(tmp_workspace):
     </property>
     <property name="passdirection">
         <value>ASCENDING</value>
+    </property>
+    <property name="sensingstart">
+        <value>2024-09-19 03:30:00.000000</value>
+    </property>
+    <property name="sensingstop">
+        <value>2024-09-19 03:30:30.000000</value>
     </property>
 </component>
 """

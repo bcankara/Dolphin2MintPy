@@ -4,8 +4,11 @@
 import pytest
 
 from dolphin2mintpy.metadata import (
+    S1_HEADING_ASCENDING,
+    S1_HEADING_DESCENDING,
     _detect_geocoded,
     _is_default_geotransform,
+    _parse_isce_datetime,
     auto_detect_ref_date,
     compute_bperp_pair,
     extract_dates_from_filename,
@@ -35,6 +38,78 @@ class TestParseIsceXml:
     def test_missing_xml_raises(self):
         with pytest.raises(FileNotFoundError):
             parse_isce_xml("/nonexistent/path/IW2.xml")
+
+    def test_derives_center_line_utc_and_times(self, sample_xml):
+        result = parse_isce_xml(sample_xml)
+        # sensingStart = 03:30:00.000000, sensingStop = 03:30:30.000000
+        # => mid acquisition 03:30:15.000000
+        # => 3*3600 + 30*60 + 15 = 12615.000 s since midnight
+        assert "center_line_utc" in result
+        assert float(result["center_line_utc"]) == pytest.approx(12615.0, abs=1e-3)
+        assert result["startutc"].startswith("2024-09-19 03:30:00")
+        assert result["stoputc"].startswith("2024-09-19 03:30:30")
+
+    def test_heading_falls_back_to_nominal(self, sample_xml):
+        # sample_xml has passDirection=ASCENDING but no explicit heading:
+        # we should get the nominal Sentinel-1 ascending value.
+        result = parse_isce_xml(sample_xml)
+        assert "heading" in result
+        assert float(result["heading"]) == pytest.approx(S1_HEADING_ASCENDING)
+
+    def test_heading_prefers_xml_value(self, tmp_workspace):
+        xml_path = tmp_workspace["ref_dir"] / "IW2_with_heading.xml"
+        xml_path.write_text(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"
+            "<component name='IW2'>\n"
+            "  <property name='passdirection'><value>ASCENDING</value></property>\n"
+            "  <property name='heading'><value>-11.9</value></property>\n"
+            "</component>\n"
+        )
+        result = parse_isce_xml(xml_path)
+        assert float(result["heading"]) == pytest.approx(-11.9)
+
+    def test_descending_heading_fallback(self, tmp_workspace):
+        xml_path = tmp_workspace["ref_dir"] / "IW2_desc.xml"
+        xml_path.write_text(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"
+            "<component name='IW2'>\n"
+            "  <property name='passdirection'><value>DESCENDING</value></property>\n"
+            "</component>\n"
+        )
+        result = parse_isce_xml(xml_path)
+        assert float(result["heading"]) == pytest.approx(S1_HEADING_DESCENDING)
+
+    def test_missing_sensing_times_is_non_fatal(self, tmp_workspace):
+        xml_path = tmp_workspace["ref_dir"] / "IW2_no_time.xml"
+        xml_path.write_text(
+            "<?xml version='1.0' encoding='UTF-8'?>\n"
+            "<component name='IW2'>\n"
+            "  <property name='passdirection'><value>ASCENDING</value></property>\n"
+            "</component>\n"
+        )
+        result = parse_isce_xml(xml_path)
+        assert "center_line_utc" not in result
+        assert "startutc" not in result
+
+
+class TestParseIsceDatetime:
+    """Tests for the ISCE2 datetime parser helper."""
+
+    def test_iso_form(self):
+        ts = _parse_isce_datetime("2024-09-19T03:30:15.123456")
+        assert ts.year == 2024 and ts.hour == 3 and ts.minute == 30
+
+    def test_space_form(self):
+        ts = _parse_isce_datetime("2024-09-19 03:30:15.123456")
+        assert ts.second == 15
+
+    def test_whole_second_form(self):
+        ts = _parse_isce_datetime("2024-09-19 03:30:15")
+        assert ts.microsecond == 0
+
+    def test_rejects_garbage(self):
+        with pytest.raises(ValueError):
+            _parse_isce_datetime("not-a-date")
 
 
 class TestParseBaselines:

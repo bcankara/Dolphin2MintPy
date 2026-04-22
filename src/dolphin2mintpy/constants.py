@@ -55,6 +55,7 @@ EARTH_RADIUS          {earth_radius}
 HEIGHT                {height}
 PLATFORM              Sen
 ORBIT_DIRECTION       {orbit_direction}
+HEADING               {heading}
 PROCESSOR             {processor}
 INSAR_PROCESSOR       {processor}
 ANTENNA_SIDE          {antenna_side}
@@ -86,6 +87,17 @@ RSC_IFG_EXTRA = """\
 DATE12                {date12}
 P_BASELINE_TOP_HDR    {bperp}
 P_BASELINE_BOTTOM_HDR {bperp}
+"""
+
+# Timing block appended only when sensingStart / sensingStop could be parsed
+# from the ISCE2 reference XML. CENTER_LINE_UTC unlocks pyaps3's ERA5 hour
+# selection in MintPy's correct_troposphere step; startUTC / stopUTC are
+# kept as human-readable copies (MintPy ignores them but several external
+# tools — and users — look for them during debugging).
+RSC_TIMING_EXTRA = """\
+CENTER_LINE_UTC       {center_line_utc}
+startUTC              {start_utc}
+stopUTC               {stop_utc}
 """
 
 # Additional lines for geometry files

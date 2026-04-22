@@ -20,11 +20,13 @@ from dolphin2mintpy.constants import (
     RSC_GEO_BLOCK,
     RSC_IFG_EXTRA,
     RSC_TEMPLATE_BASE,
+    RSC_TIMING_EXTRA,
     S1_AZIMUTH_PIXEL_SIZE,
     S1_RANGE_PIXEL_SIZE,
     S1_WAVELENGTH,
 )
 from dolphin2mintpy.metadata import (
+    _heading_from_pass,
     compute_bperp_pair,
     extract_dates_from_filename,
     parse_baselines,
@@ -134,6 +136,18 @@ def prepare_rsc(
     prf = float(rp.get("prf", 486.486))
     orbit_dir = rp.get("passdirection", "ASCENDING")
 
+    # HEADING is numeric (degrees clockwise from north). Prefer the XML
+    # value when present, otherwise derive the nominal Sentinel-1 value
+    # from passDirection so correct_troposphere / geocode can run even
+    # when the reference XML does not carry an explicit heading entry.
+    if "heading" in rp:
+        try:
+            heading = float(rp["heading"])
+        except (TypeError, ValueError):
+            heading = _heading_from_pass(orbit_dir)
+    else:
+        heading = _heading_from_pass(orbit_dir)
+
     rsc_content = RSC_TEMPLATE_BASE.format(
         width=width,
         length=length,
@@ -147,6 +161,7 @@ def prepare_rsc(
         earth_radius=float(rp.get("earthradius", DEFAULT_EARTH_RADIUS)),
         height=float(rp.get("height", DEFAULT_SAT_HEIGHT)),
         orbit_direction=orbit_dir,
+        heading=heading,
         processor=MINTPY_PROCESSOR,
         antenna_side=DEFAULT_ANTENNA_SIDE,
         alooks=int(rp.get("alooks", DEFAULT_ALOOKS)),
@@ -155,6 +170,15 @@ def prepare_rsc(
         file_type=file_type,
         data_type=gdal_meta.get("DATA_TYPE", "float32"),
     )
+
+    # Append sensing-time block only when the XML provided it; writing
+    # bogus defaults here would silently break pyaps3's ERA5 lookup.
+    if "center_line_utc" in rp:
+        rsc_content += RSC_TIMING_EXTRA.format(
+            center_line_utc=rp["center_line_utc"],
+            start_utc=rp.get("startutc", ""),
+            stop_utc=rp.get("stoputc", ""),
+        )
 
     if is_geocoded:
         x_step = float(gdal_meta.get("X_STEP", 1.0))

@@ -44,7 +44,8 @@ Dolphin2MintPy is a **two-stage metadata translation layer**. It never modifies 
 | ⚡ **Automated `.rsc`**        | Unwrapped, coherence, conncomp, DEM, incidence and azimuth — all covered.  |
 | 🌉 **Ready-to-run MintPy cfg**| Emits `demFile`, `incAngleFile`, `azAngleFile`, `lookupYFile`, `lookupXFile`, `waterMaskFile`, `networkInversion.*` and reference point — no hand-editing needed. |
 | 🔍 **Geometry auto-fill**     | Selecting the geometry directory auto-fills DEM / lookup file paths (`hgt.rdr.full`, `los.rdr.full`, `lat.rdr.full`, `lon.rdr.full`). |
-| 🛰️ **ISCE2-aware**            | Reads reference XML (wavelength, heading, incidence, PRF) + baselines.      |
+| 🛰️ **ISCE2-aware**            | Reads reference XML (wavelength, heading, incidence, PRF, sensing times) + baselines. |
+| ⏱️ **Tropo & geocode ready**   | Writes numeric `HEADING`, `CENTER_LINE_UTC`, `startUTC`, `stopUTC` into every `.rsc` so MintPy's `correct_troposphere` (pyaps3 / ERA5) and `geocode` steps run without hand-patching HDF5 metadata later. |
 | ⚙️ **Scriptable CLI**          | `prepare`, `generate-config`, `info` — HPC- and CI/CD-friendly.             |
 | 🧪 **Well-tested**            | GitHub Actions CI across Python 3.9–3.12 with 40+ unit tests.               |
 
@@ -398,9 +399,9 @@ Dolphin2MintPy also logs its decision on startup, so you can verify the mode bef
 [INFO] dolphin2mintpy.prepare: Detected geometry: RADAR — auto (no projection and identity geotransform) (override with geometry_mode='radar' or 'geo' if incorrect)
 ```
 
-### 4. The five classic MintPy failures — and which field / command fixes each
+### 4. The classic MintPy failures — and which field / command fixes each
 
-When Dolphin's GeoTIFF outputs are combined with ISCE2 topsStack geometry files, five MintPy errors tend to surface one after another. Dolphin2MintPy addresses each one explicitly:
+When Dolphin's GeoTIFF outputs are combined with ISCE2 topsStack geometry files, a handful of MintPy errors tend to surface one after another — at `load_data`, then again during `correct_troposphere` and `geocode`. Dolphin2MintPy addresses each one explicitly:
 
 | #  | MintPy error                                                         | When it happens          | Root cause                                                                         | Where to fix                                                                 |
 |----|----------------------------------------------------------------------|--------------------------|------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
@@ -409,10 +410,12 @@ When Dolphin's GeoTIFF outputs are combined with ISCE2 topsStack geometry files,
 | 3  | `FileNotFoundError: inputs/geometryGeo.h5`                           | during `load_data`       | `Y_FIRST`/`X_FIRST=0` flagged the stack as geocoded although it was radar geometry.| **Tab 1 / prepare** — `Geometry mode = radar` (GUI) / `--geometry-mode radar`.|
 | 4  | `FileNotFoundError: No lookup table (longitude or rangeCoord) found` | during `load_data`       | Missing `latitude` / `longitude` lookup paths in the MintPy config.                | **Tab 1 / prepare** — Lookup Y (`lat.rdr.full`) + Lookup X (`lon.rdr.full`).  |
 | 5  | `AttributeError: Unknown InSAR processor: hyp3 to locate look up table!` | **AFTER** `load_data`    | The `PROCESSOR=hyp3` label needed for GDAL ingest now breaks `check_loaded_dataset()`. | **Tab 2 / Post-Load Fix** — `dolphin2mintpy fix-processor --inputs-dir ./inputs`. |
+| 6  | `KeyError: 'CENTER_LINE_UTC'` / pyaps3 ERA5 hour mismatch            | during `correct_troposphere` | ISCE2 topsStack XMLs do not expose `CENTER_LINE_UTC`, so MintPy cannot pick the right ERA5 hour. | **Tab 1 / prepare** — `.rsc` derives `CENTER_LINE_UTC` from `sensingStart` / `sensingStop` in the reference XML. |
+| 7  | `AttributeError: HEADING` / pyresample `radius_of_influence=0`       | during `geocode`         | Numeric scene heading missing from the HDF5 metadata.                              | **Tab 1 / prepare** — `.rsc` always writes numeric `HEADING` (nominal S1 value from `passDirection`, or the XML value when present). |
 
 Point the **Geometry directory** field at the ISCE2 `geom_reference/` folder and the GUI auto-fills the DEM, incidence, azimuth and lookup file paths for you. From the CLI, pass the six paths explicitly to `generate-config` (see the example above).
 
-> Errors #1–#4 are caught by **Tab 1 (Prepare)**. Error #5 is caught by **Tab 2 (Post-Load Fix)**. Tab 2 is a lightweight HDF5 patch — no rasters are re-processed and the step takes well under a second.
+> Errors #1–#4, #6 and #7 are caught by **Tab 1 (Prepare)** — all seven values are written into the `.rsc` sidecars and MintPy's `load_data` step propagates them straight into `ifgramStack.h5` / `geometryRadar.h5` / `timeseries.h5`. Error #5 is caught by **Tab 2 (Post-Load Fix)**. Tab 2 is a lightweight HDF5 patch — no rasters are re-processed and the step takes well under a second.
 
 ---
 

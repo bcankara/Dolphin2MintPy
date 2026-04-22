@@ -112,6 +112,74 @@ class TestPrepareRsc:
         assert "DESCENDING" in content
         assert "850000" in content
 
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_GDAL_META)
+    def test_rsc_always_writes_numeric_heading(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        rsc_path = prepare_rsc(tif, "20240907", "20241001", 0.0)
+        content = rsc_path.read_text()
+        # HEADING is required by MintPy's geocode step (pyresample).
+        # Even without explicit radar_params it must be a numeric line.
+        heading_line = [line for line in content.splitlines() if line.startswith("HEADING")]
+        assert len(heading_line) == 1
+        value = heading_line[0].split()[1]
+        float(value)
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_GDAL_META)
+    def test_rsc_heading_follows_pass_direction(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        asc = prepare_rsc(
+            tif, "20240907", "20241001", 0.0,
+            radar_params={"passdirection": "ASCENDING"},
+        ).read_text()
+        desc = prepare_rsc(
+            tif, "20240907", "20241001", 0.0,
+            radar_params={"passdirection": "DESCENDING"},
+        ).read_text()
+
+        def _heading(text):
+            for line in text.splitlines():
+                if line.startswith("HEADING"):
+                    return float(line.split()[1])
+            raise AssertionError("HEADING line missing")
+
+        assert _heading(asc) == pytest.approx(-12.6)
+        assert _heading(desc) == pytest.approx(-167.4)
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_GDAL_META)
+    def test_rsc_timing_block_written_when_available(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        rsc_path = prepare_rsc(
+            tif, "20240907", "20241001", 0.0,
+            radar_params={
+                "passdirection": "ASCENDING",
+                "center_line_utc": "12615.000",
+                "startutc": "2024-09-19 03:30:00",
+                "stoputc": "2024-09-19 03:30:30",
+            },
+        )
+        content = rsc_path.read_text()
+        assert "CENTER_LINE_UTC" in content
+        assert "12615.000" in content
+        assert "startUTC" in content
+        assert "stopUTC" in content
+
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_GDAL_META)
+    def test_rsc_timing_block_absent_without_center_line_utc(self, mock_gdal, tmp_path):
+        tif = tmp_path / "20240907_20241001.unw.tif"
+        tif.write_bytes(b"dummy")
+
+        rsc_path = prepare_rsc(tif, "20240907", "20241001", 0.0)
+        content = rsc_path.read_text()
+        # Writing a fake CENTER_LINE_UTC would silently break pyaps3's
+        # ERA5 lookup, so the line must be omitted when unknown.
+        assert "CENTER_LINE_UTC" not in content
+
 
 class TestPrepareStack:
     """Tests for batch .rsc generation."""

@@ -8,6 +8,7 @@ Supports:
   - Date extraction from Dolphin-style filenames (YYYYMMDD_YYYYMMDD)
 """
 
+import datetime as dt
 import logging
 import re
 import xml.etree.ElementTree as ET
@@ -15,16 +16,74 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# Regex for extracting date pairs from filenames
 DATE_PAIR_PATTERN = re.compile(r"(\d{8})_(\d{8})")
+
+# Nominal Sentinel-1 heading values (degrees clockwise from north). MintPy's
+# geocoding step (pyresample radius_of_influence) requires a numeric HEADING,
+# which ISCE2 topsStack reference XMLs usually omit. The two values below
+# come from Sentinel-1 mission geometry and match what ISCE2's
+# ``Sentinel1.extractHeading`` produces for flat terrain.
+S1_HEADING_ASCENDING = -12.6
+S1_HEADING_DESCENDING = -167.4
+
+
+def _parse_isce_datetime(text):
+    """Parse an ISCE2 datetime string into a ``datetime.datetime``.
+
+    ISCE2 XMLs store sensingStart / sensingStop either as
+    ``"YYYY-MM-DD HH:MM:SS.ffffff"`` or the ISO variant with a ``T``
+    separator. Both forms appear in the wild (topsApp vs. topsStack
+    outputs), so we normalise on the space-separated form before
+    trying ``strptime``.
+
+    Parameters
+    ----------
+    text : str
+        Raw datetime string from the XML ``<value>`` node.
+
+    Returns
+    -------
+    datetime.datetime
+
+    Raises
+    ------
+    ValueError
+        If the string does not match any known ISCE2 datetime format.
+    """
+    s = text.replace("T", " ").strip()
+    for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S"):
+        try:
+            return dt.datetime.strptime(s, fmt)
+        except ValueError:
+            continue
+    raise ValueError(f"Could not parse ISCE2 datetime: {text!r}")
+
+
+def _heading_from_pass(pass_direction):
+    """Return the nominal Sentinel-1 heading for an orbit pass direction."""
+    if pass_direction and pass_direction.upper().startswith("ASC"):
+        return S1_HEADING_ASCENDING
+    return S1_HEADING_DESCENDING
 
 
 def parse_isce_xml(xml_path):
     """Extract radar parameters from an ISCE2 reference XML file.
 
-    Reads properties such as radar wavelength, range pixel size,
-    starting range, azimuth time interval, and pass direction
-    from the ISCE2 XML schema (without requiring iscesys).
+    Reads the properties MintPy needs from the ISCE2 XML schema
+    (without requiring iscesys) and derives a handful of fields that
+    downstream MintPy steps expect but are not written verbatim by
+    ISCE2:
+
+    * ``center_line_utc`` — seconds since midnight of the scene's
+      mid acquisition time. Required by ``correct_troposphere``
+      (pyaps3) to pick the right ERA5 hour.
+    * ``heading`` — numeric scene heading in degrees clockwise from
+      north. Required by ``geocode`` (pyresample radius_of_influence).
+      Uses the XML value when present, otherwise falls back to the
+      Sentinel-1 nominal value implied by ``passDirection``.
+    * ``startutc`` / ``stoputc`` — human-readable copies of
+      ``sensingStart`` / ``sensingStop`` (kept for inspection and for
+      tools that look for them).
 
     Parameters
     ----------
@@ -34,8 +93,11 @@ def parse_isce_xml(xml_path):
     Returns
     -------
     dict
-        Dictionary with keys: radarwavelength, rangepixelsize,
-        startingrange, azimuthtimeinterval, passdirection, prf.
+        Dictionary with keys (all lower-case, values as strings):
+        ``radarwavelength``, ``rangepixelsize``, ``startingrange``,
+        ``azimuthtimeinterval``, ``passdirection``, ``prf``,
+        and — when ``sensingStart`` / ``sensingStop`` are available —
+        ``center_line_utc``, ``startutc``, ``stoputc``, ``heading``.
 
     Raises
     ------
@@ -58,6 +120,9 @@ def parse_isce_xml(xml_path):
         "azimuthtimeinterval",
         "passdirection",
         "prf",
+        "sensingstart",
+        "sensingstop",
+        "heading",
     }
 
     vals = {}
@@ -77,13 +142,41 @@ def parse_isce_xml(xml_path):
         except (ValueError, ZeroDivisionError):
             pass
 
+    # Derive CENTER_LINE_UTC and friends from sensingStart / sensingStop.
+    # Failure here is non-fatal: downstream code falls back to writing
+    # .rsc files without these optional fields, and MintPy will still
+    # succeed for every step that does not need them.
+    if "sensingstart" in vals and "sensingstop" in vals:
+        try:
+            t0 = _parse_isce_datetime(vals["sensingstart"])
+            t1 = _parse_isce_datetime(vals["sensingstop"])
+            if t1 < t0:
+                raise ValueError("sensingStop precedes sensingStart")
+            tmid = t0 + (t1 - t0) / 2
+            midnight = dt.datetime.combine(tmid.date(), dt.time.min)
+            center_line_utc = (tmid - midnight).total_seconds()
+            vals["center_line_utc"] = f"{center_line_utc:.3f}"
+            vals["startutc"] = t0.isoformat(sep=" ")
+            vals["stoputc"] = t1.isoformat(sep=" ")
+        except ValueError as exc:
+            logger.warning(
+                "Could not derive CENTER_LINE_UTC from %s: %s", xml_path, exc,
+            )
+
+    # Heading: prefer explicit XML value; fall back to nominal S1 value.
+    if "heading" not in vals:
+        vals["heading"] = f"{_heading_from_pass(vals.get('passdirection', ''))}"
+
     logger.info(
-        "Parsed ISCE2 XML: wavelength=%s, range_ps=%s, starting_range=%s, prf=%s, pass=%s",
+        "Parsed ISCE2 XML: wavelength=%s, range_ps=%s, starting_range=%s, "
+        "prf=%s, pass=%s, heading=%s, center_line_utc=%s",
         vals.get("radarwavelength", "N/A"),
         vals.get("rangepixelsize", "N/A"),
         vals.get("startingrange", "N/A"),
         vals.get("prf", "N/A"),
         vals.get("passdirection", "N/A"),
+        vals.get("heading", "N/A"),
+        vals.get("center_line_utc", "N/A"),
     )
 
     return vals

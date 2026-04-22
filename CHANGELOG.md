@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Sensing-time and heading metadata** in every `.rsc` sidecar:
+  - `HEADING` is always written as a numeric value (degrees clockwise
+    from north). Uses the ISCE2 XML value when present, otherwise
+    falls back to the Sentinel-1 nominal heading implied by
+    `passDirection` (ASCENDING ≈ -12.6°, DESCENDING ≈ -167.4°). This
+    unblocks MintPy's `geocode` step (pyresample
+    `radius_of_influence`).
+  - `CENTER_LINE_UTC`, `startUTC`, `stopUTC` are derived from
+    `sensingStart` / `sensingStop` in the reference XML when
+    available. `CENTER_LINE_UTC` is required by
+    `correct_troposphere` (pyaps3) to pick the right ERA5 hour.
+  - `metadata.parse_isce_xml` now reads `sensingStart`, `sensingStop`
+    and an optional `heading` property, computing the derived values
+    above. New public helpers `S1_HEADING_ASCENDING`,
+    `S1_HEADING_DESCENDING` and `_parse_isce_datetime`.
+  - Removes the need for the previous standalone
+    `fix_mintpy_metadata.py` script (deleted): MintPy's `load_data`
+    now propagates these fields straight into `ifgramStack.h5`,
+    `geometryRadar.h5` and `timeseries.h5`.
 - **Two-stage workflow** for Dolphin -> MintPy integration:
   - Stage 1 (`Prepare`) writes `.rsc` sidecars + `mintpy_config.txt`.
   - Stage 2 (`Post-Load Fix`) patches the `PROCESSOR` HDF5 attribute
