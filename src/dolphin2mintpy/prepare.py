@@ -300,21 +300,43 @@ def prepare_stack(
     if geometry_dir:
         geom_dir = Path(geometry_dir)
         if geom_dir.exists():
-            geom_patterns = {
-                "*.dem.tif": ".dem",
-                "*dem*.tif": ".dem",
-                "*height*.tif": ".dem",
-                "*inc*.tif": ".inc",
-                "*incidence*.tif": ".inc",
-                "*lv_theta*.tif": ".inc",
-                "*az*.tif": ".az",
-                "*azimuth*.tif": ".az",
-                "*lv_phi*.tif": ".az",
-                "*shadow*.tif": ".shadowMask",
-                "*water*.tif": ".waterMask",
-            }
-            for pattern, ftype in geom_patterns.items():
+            geom_patterns = [
+                ("*.dem.tif", ".dem"),
+                ("*dem*.tif", ".dem"),
+                ("*height*.tif", ".dem"),
+                ("hgt.rdr*", ".dem"),
+                ("*hgt*.vrt", ".dem"),
+                ("*inc*.tif", ".inc"),
+                ("*incidence*.tif", ".inc"),
+                ("*lv_theta*.tif", ".inc"),
+                ("incLocal.rdr*", ".inc"),
+                ("los.rdr*", ".inc"),
+                ("*inc*.vrt", ".inc"),
+                ("*incidence*.vrt", ".inc"),
+                ("*lv_theta*.vrt", ".inc"),
+                ("*az*.tif", ".az"),
+                ("*azimuth*.tif", ".az"),
+                ("*lv_phi*.tif", ".az"),
+                ("*az*.vrt", ".az"),
+                ("*azimuth*.vrt", ".az"),
+                ("*lv_phi*.vrt", ".az"),
+                ("lat.rdr*", ".lat"),
+                ("lat*.vrt", ".lat"),
+                ("lon.rdr*", ".lon"),
+                ("lon*.vrt", ".lon"),
+                ("*shadow*.tif", ".shadowMask"),
+                ("shadowMask.rdr*", ".shadowMask"),
+                ("*shadow*.vrt", ".shadowMask"),
+                ("*water*.tif", ".waterMask"),
+                ("waterMask.rdr*", ".waterMask"),
+                ("*water*.vrt", ".waterMask"),
+            ]
+            seen_geom_files = set()
+            for pattern, ftype in geom_patterns:
                 for f in sorted(geom_dir.glob(pattern)):
+                    if not _is_data_raster(f) or f in seen_geom_files:
+                        continue
+                    seen_geom_files.add(f)
                     file_groups.append((f, ftype, False))
 
     total = len(file_groups)
@@ -426,9 +448,18 @@ def _validate_geometry_consistency(sample_tif, geometry_dir, geometry_mode):
     stack_effective, _ = _resolve_geocoded(stack_meta, geometry_mode)
 
     geom_candidates = [
-        *geom_dir.glob("*.tif"),
-        *geom_dir.glob("*dem*.tif"),
-        *geom_dir.glob("*inc*.tif"),
+        candidate
+        for pattern in (
+            "*.tif",
+            "*.vrt",
+            "hgt.rdr*",
+            "lat.rdr*",
+            "lon.rdr*",
+            "los.rdr*",
+            "incLocal.rdr*",
+        )
+        for candidate in geom_dir.glob(pattern)
+        if _is_data_raster(candidate)
     ]
     if not geom_candidates:
         return
@@ -449,6 +480,14 @@ def _validate_geometry_consistency(sample_tif, geometry_dir, geometry_mode):
             geom_candidates[0].name,
             "GEOCODED" if geom_is_geocoded else "RADAR",
         )
+
+
+def _is_data_raster(path):
+    """Return True for GDAL-readable rasters and False for metadata sidecars."""
+    if not path.is_file():
+        return False
+    name = path.name.lower()
+    return not (name.endswith(".rsc") or name.endswith(".xml"))
 
 
 def _find_tif_files(directory, patterns):

@@ -208,6 +208,33 @@ class TestPrepareStack:
         result = prepare_stack(unw_dir=unw_dir, cor_dir=cor_dir)
         assert result["rsc_written"] == 3
 
+    @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_RADAR_META)
+    def test_processes_vrt_geometry_files(self, mock_gdal, tmp_path):
+        unw_dir = tmp_path / "unw"
+        geom_dir = tmp_path / "geom_reference"
+        unw_dir.mkdir()
+        geom_dir.mkdir()
+
+        (unw_dir / "20240907_20241001.unw.tif").write_bytes(b"dummy")
+        geometry_files = [
+            "hgt.rdr.full.vrt",
+            "lat.rdr.full.vrt",
+            "lon.rdr.full.vrt",
+            "los.rdr.full.vrt",
+        ]
+        for name in geometry_files:
+            (geom_dir / name).write_bytes(b"dummy")
+
+        result = prepare_stack(
+            unw_dir=unw_dir,
+            geometry_dir=geom_dir,
+            geometry_mode="radar",
+        )
+
+        assert result["rsc_written"] == 5
+        for name in geometry_files:
+            assert (geom_dir / f"{name}.rsc").exists()
+
     @patch("dolphin2mintpy.prepare.parse_gdal_metadata", return_value=MOCK_GDAL_META)
     def test_progress_callback(self, mock_gdal, tmp_path):
         unw_dir = tmp_path / "data"
