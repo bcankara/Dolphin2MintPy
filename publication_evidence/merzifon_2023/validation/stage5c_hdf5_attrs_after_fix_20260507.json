@@ -1,0 +1,226 @@
+{
+  "generated_utc": "2026-05-07T18:33:45.682489+00:00",
+  "inputs_dir": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs",
+  "files": {
+    "ifgramStack.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5",
+      "size_bytes": 22430210515,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "FILE_TYPE": "ifgramStack",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "bperp": {
+          "shape": [
+            84
+          ],
+          "dtype": "float32",
+          "chunks": null,
+          "compression": null
+        },
+        "coherence": {
+          "shape": [
+            84,
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            3,
+            98,
+            331
+          ],
+          "compression": null
+        },
+        "connectComponent": {
+          "shape": [
+            84,
+            3134,
+            10568
+          ],
+          "dtype": "int16",
+          "chunks": [
+            3,
+            98,
+            331
+          ],
+          "compression": "lzf"
+        },
+        "date": {
+          "shape": [
+            84,
+            2
+          ],
+          "dtype": "|S8",
+          "chunks": null,
+          "compression": null
+        },
+        "dropIfgram": {
+          "shape": [
+            84
+          ],
+          "dtype": "bool",
+          "chunks": null,
+          "compression": null
+        },
+        "unwrapPhase": {
+          "shape": [
+            84,
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            3,
+            98,
+            331
+          ],
+          "compression": null
+        }
+      }
+    },
+    "geometryRadar.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5",
+      "size_bytes": 505432819,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float64",
+        "EARTH_RADIUS": "6371000.0",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_gpu/geom_reference/hgt.rdr.full.vrt",
+        "FILE_TYPE": "geometry",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "azimuthAngle": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            49,
+            331
+          ],
+          "compression": "lzf"
+        },
+        "height": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            49,
+            331
+          ],
+          "compression": "lzf"
+        },
+        "incidenceAngle": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            49,
+            331
+          ],
+          "compression": "lzf"
+        },
+        "latitude": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            49,
+            331
+          ],
+          "compression": "lzf"
+        },
+        "longitude": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            49,
+            331
+          ],
+          "compression": "lzf"
+        },
+        "slantRangeDistance": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "chunks": [
+            49,
+            331
+          ],
+          "compression": "lzf"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+generated_utc: 2026-05-07T21:42:08.847005+00:00
+work_dir: /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod
+run_status: 0
+status: PASS
+
+run_status_zero: True
+has_timeseries: True
+has_velocity: True
+has_temporal_coherence: True
+
+[avgSpatialCoh.h5] size_bytes=132969816
+  dataset coherence: shape=[3134, 10568] dtype=float32
+[maskConnComp.h5] size_bytes=33202088
+  dataset mask: shape=[3134, 10568] dtype=bool
+[maskTempCoh.h5] size_bytes=33210280
+  dataset mask: shape=[3134, 10568] dtype=bool
+[temporalCoherence.h5] size_bytes=132972136
+  dataset temporalCoherence: shape=[3134, 10568] dtype=float32
+[numInvIfgram.h5] size_bytes=132972056
+  dataset mask: shape=[3134, 10568] dtype=float32
+[timeseries.h5] size_bytes=3981426376
+  dataset bperp: shape=[30] dtype=float32
+  dataset date: shape=[30] dtype=|S8
+  dataset timeseries: shape=[30, 3134, 10568] dtype=float32
+[timeseries_demErr.h5] size_bytes=3981414264
+  dataset bperp: shape=[30] dtype=float32
+  dataset date: shape=[30] dtype=|S8
+  dataset timeseries: shape=[30, 3134, 10568] dtype=float32
+[velocity.h5] size_bytes=664826400
+  dataset intercept: shape=[3134, 10568] dtype=float32
+  dataset interceptStd: shape=[3134, 10568] dtype=float32
+  dataset residue: shape=[3134, 10568] dtype=float32
+  dataset velocity: shape=[3134, 10568] dtype=float32
+  dataset velocityStd: shape=[3134, 10568] dtype=float32
+[demErr.h5] size_bytes=132972640
+  dataset dem: shape=[3134, 10568] dtype=float32
+
+[geo]
+geo_avgSpatialCoh.h5: size_bytes=191468160
+geo_geometryRadar.h5: size_bytes=411278662
+geo_maskTempCoh.h5: size_bytes=47751480
+geo_temporalCoherence.h5: size_bytes=191469248
+geo_timeseries_demErr.h5: size_bytes=5725852792
+geo_velocity.h5: size_bytes=957309256

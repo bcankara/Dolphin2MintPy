@@ -1,0 +1,52 @@
+{
+  "generated_utc": "2026-05-07T19:26:17.037993+00:00",
+  "project_root": "/mnt/w/tubitak3501_merzifon",
+  "ifgram_h5": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5",
+  "unw_dir": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped",
+  "ifg_dir": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/interferograms",
+  "pair_count": 84,
+  "dataset_count": 3,
+  "row_block": 256,
+  "pair_limit": 0,
+  "float_atol": 1e-06,
+  "overall_status": "PASS",
+  "by_dataset": {
+    "unwrapPhase": {
+      "rows": 84,
+      "pass": 84,
+      "check": 0,
+      "fail": 0,
+      "max_abs_diff_max": 0.0,
+      "mean_abs_diff_max": 0.0,
+      "rmse_max": 0.0,
+      "correlation_min": 1.0,
+      "exact_match_ratio_min": 1.0
+    },
+    "coherence": {
+      "rows": 84,
+      "pass": 84,
+      "check": 0,
+      "fail": 0,
+      "max_abs_diff_max": 0.0,
+      "mean_abs_diff_max": 0.0,
+      "rmse_max": 0.0,
+      "correlation_min": 1.0,
+      "exact_match_ratio_min": 1.0
+    },
+    "connectComponent": {
+      "rows": 84,
+      "pass": 84,
+      "check": 0,
+      "fail": 0,
+      "max_abs_diff_max": 0.0,
+      "mean_abs_diff_max": 0.0,
+      "rmse_max": 0.0,
+      "correlation_min": 1.0,
+      "exact_match_ratio_min": 1.0
+    }
+  },
+  "outputs": {
+    "summary_json": "/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_summary_20260507.json",
+    "pair_csv": "/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_pairs_20260507.csv"
+  }
+}

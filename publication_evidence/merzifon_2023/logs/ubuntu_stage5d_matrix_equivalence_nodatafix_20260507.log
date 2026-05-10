@@ -1,0 +1,378 @@
+== Stage 5d: Matrix equivalence - Dolphin GeoTIFF vs MintPy HDF5 ==
+This validates that MintPy ifgramStack.h5 datasets preserve Dolphin raster matrices.
+It reads data in row blocks; it does not load the full stack into RAM.
+For connectComponent, source nodata pixels are excluded from equality metrics.
+
+== Environment ==
+2026-05-07T22:15:16+03:00
+CONDA_DEFAULT_ENV=insar_ai
+CONDA_PREFIX=/home/bcankara/miniforge3/envs/insar_ai
+Python 3.11.15
+
+== Path checks ==
+UNW_DIR=/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped
+IFG_DIR=/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/interferograms
+IFGRAM_H5=/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5
+SUMMARY_JSON=/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_summary_20260507.json
+PAIR_CSV=/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_pairs_20260507.csv
+PAIR_LIMIT=0
+ROW_BLOCK=256
+DATASETS=unwrapPhase,coherence,connectComponent
+FLOAT_ATOL=1e-6
+
+== Python package checks ==
+h5py 3.16.0
+numpy 2.4.4
+rasterio 1.4.4
+
+== Run matrix equivalence validation ==
+Date pairs to compare: 84
+Datasets to compare: ['unwrapPhase', 'coherence', 'connectComponent']
+-- pair 1/84: 20230110_20230122
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 2/84: 20230110_20230203
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 3/84: 20230110_20230215
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 4/84: 20230122_20230203
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 5/84: 20230122_20230215
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 6/84: 20230122_20230227
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 7/84: 20230203_20230215
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 8/84: 20230203_20230227
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 9/84: 20230203_20230311
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 10/84: 20230215_20230227
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 11/84: 20230215_20230311
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 12/84: 20230215_20230323
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 13/84: 20230227_20230311
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 14/84: 20230227_20230323
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 15/84: 20230227_20230404
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 16/84: 20230311_20230323
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 17/84: 20230311_20230404
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 18/84: 20230311_20230416
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 19/84: 20230323_20230404
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 20/84: 20230323_20230416
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 21/84: 20230323_20230428
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 22/84: 20230404_20230416
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 23/84: 20230404_20230428
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 24/84: 20230404_20230510
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 25/84: 20230416_20230428
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 26/84: 20230416_20230510
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 27/84: 20230416_20230522
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 28/84: 20230428_20230510
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 29/84: 20230428_20230522
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 30/84: 20230428_20230603
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 31/84: 20230510_20230522
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 32/84: 20230510_20230603
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 33/84: 20230510_20230615
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 34/84: 20230522_20230603
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 35/84: 20230522_20230615
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 36/84: 20230522_20230627
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 37/84: 20230603_20230615
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 38/84: 20230603_20230627
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 39/84: 20230603_20230709
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 40/84: 20230615_20230627
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 41/84: 20230615_20230709
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 42/84: 20230615_20230721
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 43/84: 20230627_20230709
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 44/84: 20230627_20230721
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 45/84: 20230627_20230802
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 46/84: 20230709_20230721
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 47/84: 20230709_20230802
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 48/84: 20230709_20230814
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 49/84: 20230721_20230802
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 50/84: 20230721_20230814
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 51/84: 20230721_20230826
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 52/84: 20230802_20230814
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 53/84: 20230802_20230826
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 54/84: 20230802_20230907
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 55/84: 20230814_20230826
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 56/84: 20230814_20230907
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 57/84: 20230814_20230919
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 58/84: 20230826_20230907
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 59/84: 20230826_20230919
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 60/84: 20230826_20231001
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 61/84: 20230907_20230919
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 62/84: 20230907_20231001
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 63/84: 20230907_20231013
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 64/84: 20230919_20231001
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 65/84: 20230919_20231013
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 66/84: 20230919_20231025
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 67/84: 20231001_20231013
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 68/84: 20231001_20231025
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 69/84: 20231001_20231106
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 70/84: 20231013_20231025
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 71/84: 20231013_20231106
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 72/84: 20231013_20231118
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 73/84: 20231025_20231106
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 74/84: 20231025_20231118
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 75/84: 20231025_20231130
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 76/84: 20231106_20231118
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 77/84: 20231106_20231130
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 78/84: 20231106_20231212
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 79/84: 20231118_20231130
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 80/84: 20231118_20231212
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 81/84: 20231118_20231224
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 82/84: 20231130_20231212
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 83/84: 20231130_20231224
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+-- pair 84/84: 20231212_20231224
+   dataset: unwrapPhase
+   dataset: coherence
+   dataset: connectComponent
+
+== Summary ==
+overall_status=PASS
+unwrapPhase: rows=84 pass=84 check=0 fail=0 max_abs_diff_max=0.0 exact_match_ratio_min=1.0
+coherence: rows=84 pass=84 check=0 fail=0 max_abs_diff_max=0.0 exact_match_ratio_min=1.0
+connectComponent: rows=84 pass=84 check=0 fail=0 max_abs_diff_max=0.0 exact_match_ratio_min=1.0
+SUMMARY_JSON=/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_summary_20260507.json
+PAIR_CSV=/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_pairs_20260507.csv
+
+== Done ==
+SUMMARY_JSON=/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_summary_20260507.json
+PAIR_CSV=/mnt/w/tubitak3501_merzifon/06_validation/stage5d_matrix_equivalence_pairs_20260507.csv

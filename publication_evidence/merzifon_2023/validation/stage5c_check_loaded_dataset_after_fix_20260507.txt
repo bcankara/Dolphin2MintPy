@@ -1,0 +1,3 @@
+check_loaded_dataset PASS
+work_dir=/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod
+result=('/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5', '/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5', '/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5', None)

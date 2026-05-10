@@ -1,0 +1,138 @@
+== Stage 5c: Dolphin2MintPy post-load processor fix ==
+This patches PROCESSOR/INSAR_PROCESSOR from hyp3 to isce after MintPy load_data wrote HDF5 files.
+It does not rerun load_data and does not rewrite raster datasets.
+
+== Environment ==
+2026-05-07T21:33:41+03:00
+CONDA_DEFAULT_ENV=insar_ai
+CONDA_PREFIX=/home/bcankara/miniforge3/envs/insar_ai
+Python 3.11.15
+/home/bcankara/miniforge3/envs/insar_ai/bin/dolphin2mintpy
+dolphin2mintpy 0.1.0
+/home/bcankara/miniforge3/envs/insar_ai/bin/smallbaselineApp.py
+MintPy version 1.6.3, date 2025-11-24
+
+== Path checks ==
+-rwxrwxrwx 1 bcankara bcankara 483M May  7 21:13 /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5
+-rwxrwxrwx 1 bcankara bcankara  21G May  7 21:24 /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5
+
+== HDF5 attributes before fix ==
+[ifgramStack.h5]
+  size_bytes=22430210515
+  PROCESSOR=hyp3
+  INSAR_PROCESSOR=hyp3
+  dataset bperp: shape=[84] dtype=float32 compression=None
+  dataset coherence: shape=[84, 3134, 10568] dtype=float32 compression=None
+  dataset connectComponent: shape=[84, 3134, 10568] dtype=int16 compression=lzf
+  dataset date: shape=[84, 2] dtype=|S8 compression=None
+  dataset dropIfgram: shape=[84] dtype=bool compression=None
+  dataset unwrapPhase: shape=[84, 3134, 10568] dtype=float32 compression=None
+[geometryRadar.h5]
+  size_bytes=505432739
+  PROCESSOR=hyp3
+  INSAR_PROCESSOR=hyp3
+  dataset azimuthAngle: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset height: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset incidenceAngle: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset latitude: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset longitude: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset slantRangeDistance: shape=[3134, 10568] dtype=float32 compression=lzf
+BEFORE_JSON=/mnt/w/tubitak3501_merzifon/06_validation/stage5c_hdf5_attrs_before_fix_20260507.json
+
+== Dolphin2MintPy verify-only before fix ==
+
+[dolphin2mintpy fix-processor] inputs dir: /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs
+
+-- Verification --
+  [OK ] ifgramStack.h5
+        exists           : True
+        PROCESSOR        : hyp3
+        INSAR_PROCESSOR  : hyp3
+        needs patch      : True
+  [OK ] geometryRadar.h5
+        exists           : True
+        PROCESSOR        : hyp3
+        INSAR_PROCESSOR  : hyp3
+        has /lat /lon    : True
+        needs patch      : True
+
+== Apply post-load processor fix ==
+21:33:45 [INFO] dolphin2mintpy.postprocess: ifgramStack.h5: PROCESSOR 'hyp3' -> 'isce'
+21:33:45 [INFO] dolphin2mintpy.postprocess: geometryRadar.h5: PROCESSOR 'hyp3' -> 'isce'
+
+[dolphin2mintpy fix-processor] inputs dir: /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs
+
+-- Verification --
+  [OK ] ifgramStack.h5
+        exists           : True
+        PROCESSOR        : hyp3
+        INSAR_PROCESSOR  : hyp3
+        needs patch      : True
+  [OK ] geometryRadar.h5
+        exists           : True
+        PROCESSOR        : hyp3
+        INSAR_PROCESSOR  : hyp3
+        has /lat /lon    : True
+        needs patch      : True
+
+-- Applying patch --
+  - ifgramStack.h5: PROCESSOR 'hyp3' -> 'isce'
+  - geometryRadar.h5: PROCESSOR 'hyp3' -> 'isce'
+
+Done: patched=2, skipped=0, errors=0.
+
+Next step: smallbaselineApp.py mintpy_config.txt (resume the full SBAS chain).
+
+== Dolphin2MintPy verify-only after fix ==
+
+[dolphin2mintpy fix-processor] inputs dir: /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs
+
+-- Verification --
+  [OK ] ifgramStack.h5
+        exists           : True
+        PROCESSOR        : isce
+        INSAR_PROCESSOR  : isce
+        needs patch      : False
+  [OK ] geometryRadar.h5
+        exists           : True
+        PROCESSOR        : isce
+        INSAR_PROCESSOR  : isce
+        has /lat /lon    : True
+        needs patch      : False
+
+== HDF5 attributes after fix ==
+[ifgramStack.h5]
+  size_bytes=22430210515
+  PROCESSOR=isce
+  INSAR_PROCESSOR=isce
+  dataset bperp: shape=[84] dtype=float32 compression=None
+  dataset coherence: shape=[84, 3134, 10568] dtype=float32 compression=None
+  dataset connectComponent: shape=[84, 3134, 10568] dtype=int16 compression=lzf
+  dataset date: shape=[84, 2] dtype=|S8 compression=None
+  dataset dropIfgram: shape=[84] dtype=bool compression=None
+  dataset unwrapPhase: shape=[84, 3134, 10568] dtype=float32 compression=None
+[geometryRadar.h5]
+  size_bytes=505432819
+  PROCESSOR=isce
+  INSAR_PROCESSOR=isce
+  dataset azimuthAngle: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset height: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset incidenceAngle: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset latitude: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset longitude: shape=[3134, 10568] dtype=float32 compression=lzf
+  dataset slantRangeDistance: shape=[3134, 10568] dtype=float32 compression=lzf
+AFTER_JSON=/mnt/w/tubitak3501_merzifon/06_validation/stage5c_hdf5_attrs_after_fix_20260507.json
+
+== MintPy check_loaded_dataset after fix ==
+Loaded dataset are processed by InSAR software: isce
+Loaded dataset are in RADAR coordinates
+Interferogram Stack: /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5
+Geometry      File : /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5
+Lookup Table  File : /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5
+--------------------------------------------------
+check_loaded_dataset PASS
+work_dir=/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod
+result=('/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5', '/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5', '/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5', None)
+
+CHECK_TXT=/mnt/w/tubitak3501_merzifon/06_validation/stage5c_check_loaded_dataset_after_fix_20260507.txt
+== Done ==

@@ -1,0 +1,46 @@
+== Stage 4n: QC Dolphin unwrap outputs ==
+Read-only on processing outputs; writes QC reports under 06_validation.
+
+== Environment ==
+2026-05-07T20:21:07+03:00
+CONDA_DEFAULT_ENV=insar_ai
+CONDA_PREFIX=/home/bcankara/miniforge3/envs/insar_ai
+Python 3.11.15
+
+== Path checks ==
+UNW_DIR=/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped
+IFG_DIR=/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/interferograms
+VALIDATION_DIR=/mnt/w/tubitak3501_merzifon/06_validation
+
+== File counts ==
+UNW_COUNT=84
+CONNCOMP_COUNT=84
+IFG_COUNT=84
+COR_COUNT=84
+
+== Raster and pair QC ==
+{
+  "generated_utc": "2026-05-07T17:21:09.638974+00:00",
+  "unw_dir": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped",
+  "ifg_dir": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/interferograms",
+  "expected_count": 84,
+  "expected_width": 10568,
+  "expected_height": 3134,
+  "counts": {
+    "unw": 84,
+    "conncomp": 84,
+    "ifg": 84,
+    "cor": 84
+  },
+  "pair_count_union": 84,
+  "first_pair": "20230110_20230122",
+  "last_pair": "20231212_20231224",
+  "issues": [],
+  "status": "PASS",
+  "csv_report": "/mnt/w/tubitak3501_merzifon/06_validation/stage4n_dolphin_unwrap_qc_20260507.csv"
+}
+
+== Reports ==
+JSON_REPORT=/mnt/w/tubitak3501_merzifon/06_validation/stage4n_dolphin_unwrap_qc_20260507.json
+CSV_REPORT=/mnt/w/tubitak3501_merzifon/06_validation/stage4n_dolphin_unwrap_qc_20260507.csv
+== Done ==

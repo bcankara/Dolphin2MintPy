@@ -1,0 +1,46 @@
+Stage 6 MintPy SBAS success excerpt
+Generated from the Merzifon 2023 Dolphin2MintPy validation run.
+
+################################################
+   Normal end of smallbaselineApp processing!
+################################################
+Time used: 34 mins 18.8 secs
+
+MintPy run exit status: 0
+
+== Summarize MintPy outputs ==
+generated_utc: 2026-05-07T21:42:08.847005+00:00
+work_dir: /mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod
+run_status: 0
+status: PASS
+
+run_status_zero: True
+has_timeseries: True
+has_velocity: True
+has_temporal_coherence: True
+
+[timeseries.h5]
+  dataset bperp: shape=[30] dtype=float32
+  dataset date: shape=[30] dtype=|S8
+  dataset timeseries: shape=[30, 3134, 10568] dtype=float32
+
+[velocity.h5]
+  dataset intercept: shape=[3134, 10568] dtype=float32
+  dataset interceptStd: shape=[3134, 10568] dtype=float32
+  dataset residue: shape=[3134, 10568] dtype=float32
+  dataset velocity: shape=[3134, 10568] dtype=float32
+  dataset velocityStd: shape=[3134, 10568] dtype=float32
+
+[temporalCoherence.h5]
+  dataset temporalCoherence: shape=[3134, 10568] dtype=float32
+
+[geo]
+geo_avgSpatialCoh.h5
+geo_geometryRadar.h5
+geo_maskTempCoh.h5
+geo_temporalCoherence.h5
+geo_timeseries_demErr.h5
+geo_velocity.h5
+
+SUMMARY_JSON=/mnt/w/tubitak3501_merzifon/06_validation/stage6_mintpy_sbas_outputs_20260507.json
+SUMMARY_TXT=/mnt/w/tubitak3501_merzifon/06_validation/stage6_mintpy_sbas_outputs_20260507.txt

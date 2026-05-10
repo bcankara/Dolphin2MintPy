@@ -1,0 +1,1153 @@
+{
+  "generated_utc": "2026-05-07T21:42:08.847005+00:00",
+  "work_dir": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod",
+  "run_status": 0,
+  "checks": {
+    "run_status_zero": true,
+    "has_timeseries": true,
+    "has_velocity": true,
+    "has_temporal_coherence": true
+  },
+  "status": "PASS",
+  "files": {
+    "avgSpatialCoh.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/avgSpatialCoh.h5",
+      "size_bytes": 132969816,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5",
+        "FILE_TYPE": "coherence",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "MODIFICATION_TIME": "1778178147.8893952",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "coherence": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "maskConnComp.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/maskConnComp.h5",
+      "size_bytes": 33202088,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/ifgramStack.h5",
+        "FILE_TYPE": "mask",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "UNIT": "radian",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "mask": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "bool",
+          "compression": null
+        }
+      }
+    },
+    "maskTempCoh.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/maskTempCoh.h5",
+      "size_bytes": 33210280,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/temporalCoherence.h5",
+        "FILE_TYPE": "mask",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_X": "6950",
+        "REF_Y": "2664",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.minTempCoh": "0.4",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.shadowMask": "True",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "mask": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "bool",
+          "compression": null
+        }
+      }
+    },
+    "temporalCoherence.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/temporalCoherence.h5",
+      "size_bytes": 132972136,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "FILE_TYPE": "temporalCoherence",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_X": "6950",
+        "REF_Y": "2664",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "temporalCoherence": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "numInvIfgram.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/numInvIfgram.h5",
+      "size_bytes": 132972056,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "FILE_TYPE": "mask",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NUMBER_BANDS": "1",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_X": "6950",
+        "REF_Y": "2664",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "mask": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "timeseries.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries.h5",
+      "size_bytes": 3981426376,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries.h5",
+        "FILE_TYPE": "timeseries",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_DATE": "20231025",
+        "REF_X": "6950",
+        "REF_Y": "2664",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "m",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "bperp": {
+          "shape": [
+            30
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "date": {
+          "shape": [
+            30
+          ],
+          "dtype": "|S8",
+          "compression": null
+        },
+        "timeseries": {
+          "shape": [
+            30,
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "timeseries_demErr.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries_demErr.h5",
+      "size_bytes": 3981414264,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries_demErr.h5",
+        "FILE_TYPE": "timeseries",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_DATE": "20231025",
+        "REF_X": "6950",
+        "REF_Y": "2664",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "m",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "mintpy.topographicResidual.excludeDate": "['exclude_date.txt']",
+        "mintpy.topographicResidual.phaseVelocity": "False",
+        "mintpy.topographicResidual.polyOrder": "2",
+        "mintpy.topographicResidual.stepDate": "[]",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "bperp": {
+          "shape": [
+            30
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "date": {
+          "shape": [
+            30
+          ],
+          "dtype": "|S8",
+          "compression": null
+        },
+        "timeseries": {
+          "shape": [
+            30,
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "velocity.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/velocity.h5",
+      "size_bytes": 664826400,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "20230110_20231224",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries_demErr.h5",
+        "FILE_TYPE": "velocity",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries_demErr.h5",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_DATE": "20231025",
+        "REF_X": "6950",
+        "REF_Y": "2664",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "m/year",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "mintpy.timeFunc.bootstrapCount": "400",
+        "mintpy.timeFunc.endDate": "None",
+        "mintpy.timeFunc.excludeDate": "['exclude_date.txt']",
+        "mintpy.timeFunc.exp": "[]",
+        "mintpy.timeFunc.log": "[]",
+        "mintpy.timeFunc.periodic": "[]",
+        "mintpy.timeFunc.polynomial": "1",
+        "mintpy.timeFunc.startDate": "None",
+        "mintpy.timeFunc.stepDate": "[]",
+        "mintpy.timeFunc.timeSeriesCovFile": "None",
+        "mintpy.timeFunc.uncertaintyQuantification": "residue",
+        "mintpy.topographicResidual.excludeDate": "['exclude_date.txt']",
+        "mintpy.topographicResidual.phaseVelocity": "False",
+        "mintpy.topographicResidual.polyOrder": "2",
+        "mintpy.topographicResidual.stepDate": "[]",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "intercept": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "interceptStd": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "residue": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "velocity": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "velocityStd": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "demErr.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/demErr.h5",
+      "size_bytes": 132972640,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "FILE_TYPE": "dem",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "3134",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_DATE": "20230110",
+        "REF_X": "6950",
+        "REF_Y": "2664",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "m",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "10568",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "mintpy.topographicResidual.excludeDate": "['exclude_date.txt']",
+        "mintpy.topographicResidual.phaseVelocity": "False",
+        "mintpy.topographicResidual.polyOrder": "2",
+        "mintpy.topographicResidual.stepDate": "[]",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "dem": {
+          "shape": [
+            3134,
+            10568
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    }
+  },
+  "geo_files": {
+    "geo_avgSpatialCoh.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/geo/geo_avgSpatialCoh.h5",
+      "size_bytes": 191468160,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/avgSpatialCoh.h5",
+        "FILE_TYPE": "coherence",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "10199",
+        "MODIFICATION_TIME": "1778178147.8893952",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "4658",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "X_FIRST": "35.19070321437337",
+        "X_STEP": "0.0001167035774740766",
+        "X_UNIT": "degrees",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "Y_FIRST": "41.07223382654662",
+        "Y_STEP": "-4.32146166810482e-05",
+        "Y_UNIT": "degrees",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "coherence": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "geo_geometryRadar.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/geo/geo_geometryRadar.h5",
+      "size_bytes": 411278662,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "EARTH_RADIUS": "6371000.0",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/inputs/geometryRadar.h5",
+        "FILE_TYPE": "geometry",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "10199",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_gpu/geom_reference/hgt.rdr.full.vrt",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "4658",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "X_FIRST": "35.19070321437337",
+        "X_STEP": "0.0001167035774740766",
+        "X_UNIT": "degrees",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "Y_FIRST": "41.07223382654662",
+        "Y_STEP": "-4.32146166810482e-05",
+        "Y_UNIT": "degrees",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "azimuthAngle": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": "lzf"
+        },
+        "height": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": "lzf"
+        },
+        "incidenceAngle": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": "lzf"
+        },
+        "latitude": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": "lzf"
+        },
+        "longitude": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": "lzf"
+        },
+        "slantRangeDistance": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": "lzf"
+        }
+      }
+    },
+    "geo_maskTempCoh.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/geo/geo_maskTempCoh.h5",
+      "size_bytes": 47751480,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/geo/geo_temporalCoherence.h5",
+        "FILE_TYPE": "mask",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "10199",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_LAT": "40.72702",
+        "REF_LON": "35.3524",
+        "REF_X": "1386",
+        "REF_Y": "7988",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "4658",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "X_FIRST": "35.19070321437337",
+        "X_STEP": "0.0001167035774740766",
+        "X_UNIT": "degrees",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "Y_FIRST": "41.07223382654662",
+        "Y_STEP": "-4.32146166810482e-05",
+        "Y_UNIT": "degrees",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "mask": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "bool",
+          "compression": null
+        }
+      }
+    },
+    "geo_temporalCoherence.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/geo/geo_temporalCoherence.h5",
+      "size_bytes": 191469248,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/temporalCoherence.h5",
+        "FILE_TYPE": "temporalCoherence",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "10199",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped/20230110_20230122.unw.tif",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_LAT": "40.72702",
+        "REF_LON": "35.3524",
+        "REF_X": "1386",
+        "REF_Y": "7988",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "1",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "4658",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "X_FIRST": "35.19070321437337",
+        "X_STEP": "0.0001167035774740766",
+        "X_UNIT": "degrees",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "Y_FIRST": "41.07223382654662",
+        "Y_STEP": "-4.32146166810482e-05",
+        "Y_UNIT": "degrees",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "temporalCoherence": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "geo_timeseries_demErr.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/geo/geo_timeseries_demErr.h5",
+      "size_bytes": 5725852792,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "230110-230122",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries_demErr.h5",
+        "FILE_TYPE": "timeseries",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "10199",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries_demErr.h5",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_DATE": "20231025",
+        "REF_LAT": "40.72702",
+        "REF_LON": "35.3524",
+        "REF_X": "1386",
+        "REF_Y": "7988",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "m",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "4658",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "X_FIRST": "35.19070321437337",
+        "X_STEP": "0.0001167035774740766",
+        "X_UNIT": "degrees",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "Y_FIRST": "41.07223382654662",
+        "Y_STEP": "-4.32146166810482e-05",
+        "Y_UNIT": "degrees",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "mintpy.topographicResidual.excludeDate": "['exclude_date.txt']",
+        "mintpy.topographicResidual.phaseVelocity": "False",
+        "mintpy.topographicResidual.polyOrder": "2",
+        "mintpy.topographicResidual.stepDate": "[]",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "bperp": {
+          "shape": [
+            30
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "date": {
+          "shape": [
+            30
+          ],
+          "dtype": "|S8",
+          "compression": null
+        },
+        "timeseries": {
+          "shape": [
+            30,
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    },
+    "geo_velocity.h5": {
+      "path": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/geo/geo_velocity.h5",
+      "size_bytes": 957309256,
+      "attrs": {
+        "ALOOKS": "1",
+        "ANTENNA_SIDE": "-1",
+        "AZIMUTH_PIXEL_SIZE": "13.932898",
+        "CENTER_LINE_UTC": "13323.691",
+        "DATA_TYPE": "float32",
+        "DATE12": "20230110_20231224",
+        "EARTH_RADIUS": "6371000.0",
+        "END_DATE": "20231224",
+        "FILE_LENGTH": "3134",
+        "FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/velocity.h5",
+        "FILE_TYPE": "velocity",
+        "HEADING": "-167.4",
+        "HEIGHT": "693000.0",
+        "INSAR_PROCESSOR": "isce",
+        "LENGTH": "10199",
+        "NO_DATA_VALUE": "none",
+        "NUMBER_BANDS": "1",
+        "OG_FILE_PATH": "/mnt/w/tubitak3501_merzifon/05_mintpy/aoi_crop_cpu_prod/timeseries_demErr.h5",
+        "ORBIT_DIRECTION": "DESCENDING",
+        "PLATFORM": "Sen",
+        "PRF": "486.48631029955294",
+        "PROCESSOR": "isce",
+        "PROJECT_NAME": "mintpy_config",
+        "P_BASELINE_BOTTOM_HDR": "-103.1197",
+        "P_BASELINE_TOP_HDR": "-103.1197",
+        "RANGE_PIXEL_SIZE": "2.329562114715323",
+        "REF_DATE": "20231025",
+        "REF_LAT": "40.72702",
+        "REF_LON": "35.3524",
+        "REF_X": "1386",
+        "REF_Y": "7988",
+        "RLOOKS": "1",
+        "STARTING_RANGE": "846188.0476033625",
+        "START_DATE": "20230110",
+        "UNIT": "m/year",
+        "WAVELENGTH": "0.05546576",
+        "WIDTH": "4658",
+        "XMAX": "10567",
+        "XMIN": "0",
+        "X_FIRST": "35.19070321437337",
+        "X_STEP": "0.0001167035774740766",
+        "X_UNIT": "degrees",
+        "YMAX": "3133",
+        "YMIN": "0",
+        "Y_FIRST": "41.07223382654662",
+        "Y_STEP": "-4.32146166810482e-05",
+        "Y_UNIT": "degrees",
+        "mintpy.networkInversion.maskDataset": "connectComponent",
+        "mintpy.networkInversion.maskThreshold": "0.4",
+        "mintpy.networkInversion.minNormVelocity": "True",
+        "mintpy.networkInversion.minRedundancy": "1.0",
+        "mintpy.networkInversion.numIfgram": "84",
+        "mintpy.networkInversion.obsDatasetName": "unwrapPhase",
+        "mintpy.networkInversion.weightFunc": "coherence",
+        "mintpy.timeFunc.bootstrapCount": "400",
+        "mintpy.timeFunc.endDate": "None",
+        "mintpy.timeFunc.excludeDate": "['exclude_date.txt']",
+        "mintpy.timeFunc.exp": "[]",
+        "mintpy.timeFunc.log": "[]",
+        "mintpy.timeFunc.periodic": "[]",
+        "mintpy.timeFunc.polynomial": "1",
+        "mintpy.timeFunc.startDate": "None",
+        "mintpy.timeFunc.stepDate": "[]",
+        "mintpy.timeFunc.timeSeriesCovFile": "None",
+        "mintpy.timeFunc.uncertaintyQuantification": "residue",
+        "mintpy.topographicResidual.excludeDate": "['exclude_date.txt']",
+        "mintpy.topographicResidual.phaseVelocity": "False",
+        "mintpy.topographicResidual.polyOrder": "2",
+        "mintpy.topographicResidual.stepDate": "[]",
+        "startUTC": "2023-01-10 03:42:02.135927",
+        "stopUTC": "2023-01-10 03:42:05.245984"
+      },
+      "datasets": {
+        "intercept": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "interceptStd": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "residue": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "velocity": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        },
+        "velocityStd": {
+          "shape": [
+            10199,
+            4658
+          ],
+          "dtype": "float32",
+          "compression": null
+        }
+      }
+    }
+  }
+}

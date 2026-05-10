@@ -1,0 +1,20 @@
+{
+  "generated_utc": "2026-05-07T17:21:09.638974+00:00",
+  "unw_dir": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/unwrapped",
+  "ifg_dir": "/mnt/w/tubitak3501_merzifon/03_dolphin/aoi_crop_cpu_prod/work/interferograms",
+  "expected_count": 84,
+  "expected_width": 10568,
+  "expected_height": 3134,
+  "counts": {
+    "unw": 84,
+    "conncomp": 84,
+    "ifg": 84,
+    "cor": 84
+  },
+  "pair_count_union": 84,
+  "first_pair": "20230110_20230122",
+  "last_pair": "20231212_20231224",
+  "issues": [],
+  "status": "PASS",
+  "csv_report": "/mnt/w/tubitak3501_merzifon/06_validation/stage4n_dolphin_unwrap_qc_20260507.csv"
+}
